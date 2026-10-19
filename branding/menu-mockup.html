@@ -1,0 +1,220 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SkyMole menu</title>
+<link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --gold: #FFC93C; --pink: #F29BB0; --panel: #1E1712; --line: #3A2C20; --line2: #5A4430;
+    --text: #F4EDE4; --dim: #B5A797; --good: #7BD88F; --mithril: #4FC9DE;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; font-family: "Pixelify Sans", Consolas, monospace; color: var(--text);
+    background: repeating-linear-gradient(135deg, #2c241d 0 24px, #262019 24px 48px); display: flex; align-items: center; justify-content: center; padding: 16px; user-select: none; }
+  img { image-rendering: pixelated; }
+  .win { width: 760px; max-width: 100%; background: rgba(30,23,18,0.96); border: 2px solid var(--line2); box-shadow: 0 0 0 4px rgba(0,0,0,.35); }
+  .head { display: flex; align-items: center; gap: 16px; padding: 14px 16px 12px; }
+  .head .logo { border: 2px solid var(--gold); box-shadow: 0 0 0 3px #120d09; }
+  .head .name { font-family: "Silkscreen", monospace; font-size: 28px; color: var(--gold); line-height: 1; }
+  .head .tag { font-size: 13px; color: var(--dim); margin-top: 3px; }
+  .head .ver { margin-left: auto; font-size: 12px; color: var(--dim); text-align: right; }
+  .tabs { display: flex; border-top: 2px solid var(--line); border-bottom: 2px solid var(--line); }
+  .tab { flex: 1; text-align: center; padding: 8px 0; font-size: 14px; color: var(--dim); border-right: 2px solid var(--line); cursor: pointer; }
+  .tab:last-child { border-right: 0; }
+  .tab:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .tab.on { color: var(--gold); background: rgba(255,201,60,0.08); box-shadow: inset 0 -2px 0 var(--gold); }
+  .tab i { font-style: normal; margin-right: 6px; }
+  .content { padding: 6px 12px 14px 18px; height: 470px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--line2) #120d09; }
+  .content::-webkit-scrollbar { width: 6px; } .content::-webkit-scrollbar-track { background: #120d09; } .content::-webkit-scrollbar-thumb { background: var(--line2); }
+  h3 { font-family: "Silkscreen", monospace; font-size: 12px; font-weight: 400; color: var(--gold); letter-spacing: 1px; margin: 16px 0 6px; }
+  .desc { font-size: 13px; color: var(--dim); margin: -2px 0 8px; }
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: #261d16; border: 1px solid var(--line); padding: 6px 10px; margin-bottom: 4px; font-size: 15px; cursor: pointer; }
+  .row:hover { border-color: var(--line2); background: #2c221a; }
+  .row.changed .lbl::after { content: " •"; color: var(--gold); }
+  .toggle { width: 34px; height: 16px; background: #3a2e24; position: relative; flex-shrink: 0; }
+  .toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; background: var(--dim); transition: left .08s; }
+  .toggle.on { background: var(--gold); }
+  .toggle.on::after { left: 20px; background: #1E1712; }
+  .slider { display: flex; align-items: center; gap: 10px; color: var(--dim); font-size: 14px; }
+  .bar { width: 220px; max-width: 40vw; height: 6px; background: #3a2e24; position: relative; cursor: ew-resize; }
+  .bar::before { content: ""; position: absolute; left: 0; right: 0; top: -8px; bottom: -8px; }
+  .bar span { position: absolute; left: 0; top: 0; bottom: 0; background: var(--gold); }
+  .bar b { position: absolute; top: -5px; width: 6px; height: 16px; margin-left: -3px; background: var(--text); }
+  .val { min-width: 44px; text-align: right; }
+  .cycle { color: var(--text); font-size: 14px; white-space: nowrap; }
+  .cycle s { text-decoration: none; color: var(--gold); padding: 0 6px; }
+  .cycle s:hover { color: var(--text); }
+  .btn { margin-top: 10px; border: 2px solid var(--gold); color: var(--gold); text-align: center; padding: 7px; font-size: 15px; cursor: pointer; }
+  .btn:hover { background: var(--gold); color: #1E1712; }
+  .foot { display: flex; justify-content: space-between; gap: 12px; border-top: 2px solid var(--line); padding: 7px 14px; font-size: 12px; color: var(--dim); }
+  .foot k { color: var(--text); }
+  .strip { height: 8px; position: relative; background: repeating-linear-gradient(90deg, #6A4628 0 16px, #5A3A20 16px 32px); }
+  .strip::after { content: ""; position: absolute; inset: 0;
+    background: radial-gradient(circle at 40px 4px, var(--mithril) 2px, transparent 3px), radial-gradient(circle at 210px 4px, var(--gold) 2px, transparent 3px), radial-gradient(circle at 470px 4px, var(--mithril) 2px, transparent 3px), radial-gradient(circle at 650px 4px, var(--gold) 2px, transparent 3px); }
+  .toast { position: fixed; left: 50%; bottom: 28px; transform: translateX(-50%); background: #120d09; border: 2px solid var(--gold); padding: 8px 14px; font-size: 14px; opacity: 0; transition: opacity .15s; pointer-events: none; }
+  .toast.show { opacity: 1; }
+  .toast span { color: var(--gold); }
+  .closed { text-align: center; color: var(--dim); font-size: 15px; }
+  .closed .cmd { display: inline-block; margin-top: 12px; border: 2px solid var(--gold); color: var(--gold); padding: 8px 16px; cursor: pointer; }
+  .closed .cmd:hover { background: var(--gold); color: #1E1712; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="win" id="win">
+  <div class="head">
+    <img class="logo" width="64" height="64" alt="SkyMole logo" src="data:image/png;base64,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">
+    <div>
+      <div class="name">SkyMole</div>
+      <div class="tag">Dwarven Mines helper for SkyBlock</div>
+    </div>
+    <div class="ver">v0.1.0<br>by sculike</div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div class="content" id="content"></div>
+  <div class="strip"></div>
+  <div class="foot">
+    <span><k>Click</k> to change · <k>Right-click</k> to reset · <k>Esc</k> to close</span>
+    <span>/skymole</span>
+  </div>
+</div>
+<div class="closed hidden" id="closed">
+  Menu closed. In game you'd reopen it with a command.<br>
+  <span class="cmd" id="reopen">/skymole</span>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const T = (label, value, desc) => ({ type: "toggle", label, value, desc });
+const S = (label, value, min, max, step, unit) => ({ type: "slider", label, value, min, max, step, unit });
+const C = (label, value, options) => ({ type: "cycle", label, value, options });
+const B = (label, msg) => ({ type: "button", label, msg });
+
+const tabs = [
+  { id: "comm", icon: "⛏", name: "Commissions", sections: [
+    { title: "Commission HUD", desc: "Shows your active commissions and progress while you're in the mines.", items: [
+      T("Show commission HUD", true), T("Show percentages", true),
+      C("Sort order", 0, ["By progress", "By name", "Hypixel order"]),
+      S("Text scale", 100, 50, 200, 5, "%") ] },
+    { title: "Alerts", desc: "A title and sound when a commission is ready to claim.", items: [
+      T("Commission done alert", true), C("Alert sound", 0, ["Pling", "Level up", "Anvil", "None"]),
+      S("Volume", 80, 0, 100, 5, "%") ] },
+    { title: "Waypoints", desc: "Marks where each commission is done. Only shows places you could walk to anyway.", items: [
+      T("Show commission waypoints", false), T("Show Emissary locations", true) ] },
+    { items: [ B("Edit HUD position", "Opens the HUD editor: drag panels where you want them.") ] } ] },
+  { id: "powder", icon: "◆", name: "Powder", sections: [
+    { title: "Powder tracker", desc: "Counts powder gained this session and how much per hour.", items: [
+      T("Show powder HUD", true), T("Show per-hour rates", true),
+      C("Track", 0, ["All powders", "Mithril", "Gemstone", "Glacite"]),
+      C("Reset session", 0, ["On world change", "After 10 min idle", "Manually"]) ] },
+    { title: "2x powder", items: [ T("Highlight 2x powder time", true), T("Notify when 2x powder starts", true) ] },
+    { items: [ B("Reset session now", "Powder session reset.") ] } ] },
+  { id: "events", icon: "⏱", name: "Events", sections: [
+    { title: "Event timers", desc: "Countdowns for Dwarven Mines events, shown on the HUD.", items: [
+      T("2x Powder", true), T("Goblin Raid", true), T("Raffle", true), T("Better Together", false),
+      T("Gone With the Wind", false), T("Mithril Gourmand", false) ] },
+    { title: "Warnings", items: [ S("Warn before start", 1, 0, 5, 1, " min"), T("Star Cult countdown", true), T("Golden Goblin alert", true) ] },
+    { items: [ B("Test alert", "This is what an event alert looks like.") ] } ] },
+  { id: "solvers", icon: "?", name: "Solvers", sections: [
+    { title: "Daily NPCs", desc: "Answers for Fetchur and the Puzzler, so you don't have to look them up.", items: [
+      T("Fetchur solver", true), T("Puzzler solver", true) ] },
+    { title: "Info", items: [ T("King tracker", true), T("Sky Mall perk display", true), C("Sky Mall perk filter", 0, ["Show all", "Only good perks"]) ] } ] },
+  { id: "hud", icon: "▣", name: "HUD", sections: [
+    { title: "Look", desc: "Applies to every SkyMole panel.", items: [
+      S("Background opacity", 80, 0, 100, 5, "%"), S("HUD scale", 100, 50, 200, 5, "%"), T("Text shadow", true),
+      C("Accent color", 0, ["Lamp gold", "Mithril", "Snout pink"]) ] },
+    { title: "Where to show", items: [ T("Only in mining areas", true), T("Hide when F3 is open", true) ] },
+    { items: [ B("Edit HUD positions", "Opens the HUD editor: drag panels where you want them.") ] } ] }
+];
+for (const t of tabs) for (const s of t.sections) for (const it of s.items) it.def = it.value;
+
+let current = 0;
+const $ = id => document.getElementById(id);
+let toastTimer;
+function toast(html) { const el = $("toast"); el.innerHTML = html; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 1600); }
+
+function renderTabs() {
+  $("tabs").innerHTML = "";
+  tabs.forEach((t, i) => {
+    const d = document.createElement("div");
+    d.className = "tab" + (i === current ? " on" : "");
+    d.innerHTML = `<i>${t.icon}</i>${t.name}`;
+    d.onclick = () => { current = i; renderTabs(); renderContent(); $("content").scrollTop = 0; };
+    $("tabs").appendChild(d);
+  });
+}
+
+function control(it) {
+  if (it.type === "toggle") return `<div class="toggle${it.value ? " on" : ""}"></div>`;
+  if (it.type === "cycle") return `<div class="cycle"><s data-dir="-1">&lt;</s>${it.options[it.value]}<s data-dir="1">&gt;</s></div>`;
+  if (it.type === "slider") {
+    const pct = (it.value - it.min) / (it.max - it.min) * 100;
+    return `<div class="slider"><div class="bar"><span style="width:${pct}%"></span><b style="left:${pct}%"></b></div><span class="val">${it.value}${it.unit}</span></div>`;
+  }
+  return "";
+}
+
+function renderContent() {
+  const box = $("content");
+  box.innerHTML = "";
+  for (const s of tabs[current].sections) {
+    if (s.title) { const h = document.createElement("h3"); h.textContent = s.title; box.appendChild(h); }
+    if (s.desc) { const p = document.createElement("div"); p.className = "desc"; p.textContent = s.desc; box.appendChild(p); }
+    for (const it of s.items) {
+      if (it.type === "button") {
+        const b = document.createElement("div"); b.className = "btn"; b.textContent = it.label;
+        b.onclick = () => toast(`<span>SkyMole »</span> ${it.msg}`);
+        box.appendChild(b); continue;
+      }
+      const row = document.createElement("div");
+      row.className = "row" + (it.value !== it.def ? " changed" : "");
+      row.innerHTML = `<span class="lbl">${it.label}</span>${control(it)}`;
+      const redraw = () => { row.className = "row" + (it.value !== it.def ? " changed" : ""); row.innerHTML = `<span class="lbl">${it.label}</span>${control(it)}`; wire(); };
+      const wire = () => {
+        if (it.type === "slider") {
+          const bar = row.querySelector(".bar");
+          const setFrom = e => {
+            const r = row.querySelector(".bar").getBoundingClientRect();
+            const f = Math.min(1, Math.max(0, (e.clientX - r.left) / r.width));
+            const v = Math.round((it.min + f * (it.max - it.min)) / it.step) * it.step;
+            if (v !== it.value) { it.value = v; redraw(); }
+          };
+          bar.onpointerdown = e => {
+            if (e.button !== 0) return;
+            e.preventDefault(); setFrom(e);
+            const move = ev => setFrom(ev);
+            const up = () => {
+              if (it.value !== it.def) row.classList.add("changed"); window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+            window.addEventListener("pointermove", move); window.addEventListener("pointerup", up);
+          };
+        }
+      };
+      row.onclick = e => {
+        if (it.type === "toggle") { it.value = !it.value; redraw(); }
+        else if (it.type === "cycle") {
+          const dir = e.target.dataset && e.target.dataset.dir ? +e.target.dataset.dir : 1;
+          it.value = (it.value + dir + it.options.length) % it.options.length; redraw();
+        }
+      };
+      row.oncontextmenu = e => {
+        e.preventDefault();
+        if (it.value !== it.def) { it.value = it.def; redraw(); toast(`<span>Reset</span> ${it.label}`); }
+      };
+      wire();
+      box.appendChild(row);
+    }
+  }
+}
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") { $("win").classList.add("hidden"); $("closed").classList.remove("hidden"); }
+});
+$("reopen").onclick = () => { $("closed").classList.add("hidden"); $("win").classList.remove("hidden"); };
+
+renderTabs();
+renderContent();
+</script>
+</body>
+</html>

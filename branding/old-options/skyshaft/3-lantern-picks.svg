@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="glow"><stop offset="0" stop-color="#FFD45E" stop-opacity=".55"/><stop offset="1" stop-color="#FFD45E" stop-opacity="0"/></radialGradient>
+    <g id="pick">
+      <line x1="120" y1="420" x2="330" y2="190" stroke="#B57D47" stroke-width="26" stroke-linecap="round"/>
+      <path d="M276 116 Q376 120 408 222" fill="none" stroke="#C9D3D9" stroke-width="36" stroke-linecap="round"/>
+      <path d="M284 128 Q366 134 394 214" fill="none" stroke="#8E9AA1" stroke-width="10" stroke-linecap="round"/>
+    </g>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="#14223A"/>
+  <use href="#pick"/>
+  <use href="#pick" transform="translate(512 0) scale(-1 1)"/>
+  <circle cx="256" cy="292" r="150" fill="url(#glow)"/>
+  <path d="M220 214 Q256 160 292 214" fill="none" stroke="#3A3A3A" stroke-width="12" stroke-linecap="round"/>
+  <rect x="206" y="212" width="100" height="26" rx="8" fill="#3A3A3A"/>
+  <rect x="216" y="236" width="80" height="104" rx="10" fill="#FFE59A"/>
+  <rect x="216" y="236" width="80" height="104" rx="10" fill="none" stroke="#3A3A3A" stroke-width="10"/>
+  <line x1="256" y1="236" x2="256" y2="340" stroke="#3A3A3A" stroke-width="8"/>
+  <ellipse cx="256" cy="292" rx="16" ry="24" fill="#FFB020"/>
+  <rect x="206" y="336" width="100" height="24" rx="8" fill="#3A3A3A"/>
+</svg>

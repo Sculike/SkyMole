@@ -1,0 +1,98 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>SkyMole brand sheet</title>
+<style>
+  body { margin: 0; background: #14100C; color: #F4EDE4; font-family: "Segoe UI", sans-serif; }
+  .page { width: 1400px; padding: 48px 56px; box-sizing: border-box; }
+  img { image-rendering: pixelated; display: block; }
+  .top { display: flex; gap: 40px; align-items: center; }
+  h1 { font-size: 64px; margin: 0; font-weight: 800; letter-spacing: -1px; }
+  h1 span { color: #FFC93C; }
+  .sub { color: #B5A797; font-size: 20px; margin-top: 6px; }
+  .by { color: #F29BB0; font-size: 16px; margin-top: 14px; }
+  .sizes { display: flex; gap: 20px; align-items: flex-end; margin-left: auto; }
+  .sizes div { text-align: center; color: #B5A797; font-size: 12px; }
+  .sizes img { margin-bottom: 6px; }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: 2px; color: #B5A797; font-weight: 600; margin: 40px 0 14px; }
+  .swatches { display: grid; grid-template-columns: repeat(7, 1fr); gap: 12px; }
+  .sw { border-radius: 10px; overflow: hidden; background: #1E1712; }
+  .sw .c { height: 74px; }
+  .sw .t { padding: 8px 10px; font-size: 13px; }
+  .sw .t b { display: block; font-size: 14px; }
+  .sw .t span { color: #B5A797; font-family: Consolas, monospace; }
+  .row { display: flex; gap: 32px; align-items: flex-start; }
+  .game { background: #3B3F36; border-radius: 10px; padding: 20px; flex: 1; font-family: Consolas, monospace; font-size: 15px; }
+  .hud { background: rgba(30,23,18,0.8); padding: 10px 14px; width: 300px; display: inline-block; vertical-align: top; margin-right: 14px; border-left: 3px solid #FFC93C; }
+  .hud .h { color: #FFC93C; margin-bottom: 6px; }
+  .hud .l { display: flex; justify-content: space-between; }
+  .chat { background: rgba(0,0,0,0.45); padding: 6px 10px; margin-top: 16px; }
+  .rules { width: 380px; font-size: 15px; line-height: 1.6; color: #D9CFC2; }
+  .rules b { color: #F4EDE4; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="top">
+    <img src="icon-512.png" width="180" height="180" alt="SkyMole icon">
+    <div>
+      <h1>Sky<span>Mole</span></h1>
+      <div class="sub">Dwarven Mines and mining helper for Hypixel SkyBlock</div>
+      <div class="by">by sculike</div>
+    </div>
+    <div class="sizes">
+      <div><img src="icon-128.png" width="128" height="128">128</div>
+      <div><img src="icon-128.png" width="64" height="64">64</div>
+      <div><img src="icon-32.png" width="32" height="32">32 (mod menu)</div>
+    </div>
+  </div>
+
+  <h2>Core palette</h2>
+  <div class="swatches">
+    <div class="sw"><div class="c" style="background:#FFC93C"></div><div class="t"><b>Lamp gold</b><span>#FFC93C</span><br>Main accent</div></div>
+    <div class="sw"><div class="c" style="background:#F29BB0"></div><div class="t"><b>Snout pink</b><span>#F29BB0</span><br>Signature, sparingly</div></div>
+    <div class="sw"><div class="c" style="background:#62626E"></div><div class="t"><b>Fur light</b><span>#62626E</span><br>Borders</div></div>
+    <div class="sw"><div class="c" style="background:#4A4A55"></div><div class="t"><b>Fur</b><span>#4A4A55</span><br>Surfaces</div></div>
+    <div class="sw"><div class="c" style="background:#6A4628"></div><div class="t"><b>Dirt</b><span>#6A4628</span><br>Backgrounds</div></div>
+    <div class="sw"><div class="c" style="background:#5A3A20"></div><div class="t"><b>Deep dirt</b><span>#5A3A20</span><br>Backgrounds</div></div>
+    <div class="sw"><div class="c" style="background:#1A0F08; outline: 1px solid #3a2a1c; outline-offset:-1px"></div><div class="t"><b>Tunnel</b><span>#1A0F08</span><br>Outlines</div></div>
+  </div>
+
+  <h2>UI and status</h2>
+  <div class="swatches">
+    <div class="sw"><div class="c" style="background:#1E1712; outline: 1px solid #3a2a1c; outline-offset:-1px"></div><div class="t"><b>Panel</b><span>#1E1712 80%</span><br>HUD background</div></div>
+    <div class="sw"><div class="c" style="background:#F4EDE4"></div><div class="t"><b>Text</b><span>#F4EDE4</span><br>Main text</div></div>
+    <div class="sw"><div class="c" style="background:#B5A797"></div><div class="t"><b>Text dim</b><span>#B5A797</span><br>Labels, numbers</div></div>
+    <div class="sw"><div class="c" style="background:#7BD88F"></div><div class="t"><b>Good</b><span>#7BD88F</span><br>Done, active</div></div>
+    <div class="sw"><div class="c" style="background:#FF7A45"></div><div class="t"><b>Warn</b><span>#FF7A45</span><br>Low fuel, cold</div></div>
+    <div class="sw"><div class="c" style="background:#FF5C5C"></div><div class="t"><b>Bad</b><span>#FF5C5C</span><br>Errors, danger</div></div>
+    <div class="sw"><div class="c" style="background:#4FC9DE"></div><div class="t"><b>Mithril</b><span>#4FC9DE</span><br>Info, powder</div></div>
+  </div>
+
+  <h2>In game</h2>
+  <div class="row">
+    <div class="game">
+      <div class="hud">
+        <div class="h">Commissions</div>
+        <div class="l"><span>Goblin Slayer</span><span style="color:#B5A797">45%</span></div>
+        <div class="l"><span>Mithril Miner</span><span style="color:#B5A797">80%</span></div>
+        <div class="l"><span>Lava Springs Titanium</span><span style="color:#7BD88F">Done</span></div>
+      </div><div class="hud">
+        <div class="h">Powder</div>
+        <div class="l"><span>Mithril</span><span style="color:#4FC9DE">+48,210 <span style="color:#B5A797">96k/h</span></span></div>
+        <div class="l"><span>Gemstone</span><span style="color:#F29BB0">+12,900 <span style="color:#B5A797">26k/h</span></span></div>
+        <div class="l"><span>Drill fuel</span><span style="color:#FF7A45">Low · 812</span></div>
+      </div>
+      <div class="chat"><span style="color:#FFC93C">SkyMole</span><span style="color:#B5A797"> » </span>Commission done: Lava Springs Titanium</div>
+    </div>
+    <div class="rules">
+      <b>Gold leads.</b> Titles and the chat prefix use lamp gold. Nothing else uses it, so it always means "this is SkyMole".<br>
+      <b>Pink is rare.</b> Only the logo, the "by sculike" line and gemstone values.<br>
+      <b>Status colors mean one thing.</b> Green done, orange warning, red danger, cyan info. Never as decoration.<br>
+      <b>Warm darks.</b> Panels use brown-black, not gray, so the HUD feels like the mines.
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E2346"/><stop offset="1" stop-color="#15101F"/></linearGradient>
+    <radialGradient id="glow"><stop offset="0" stop-color="#C77DFF" stop-opacity=".5"/><stop offset="1" stop-color="#C77DFF" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <circle cx="256" cy="210" r="170" fill="url(#glow)"/>
+  <path d="M200 260 L224 120 L252 260 Z" fill="#B8F3FA"/><path d="M224 120 L252 260 L224 260 Z" fill="#4FC9DE"/>
+  <path d="M250 260 L292 96 L330 260 Z" fill="#E9B8FF"/><path d="M292 96 L330 260 L292 260 Z" fill="#9B4DCA"/>
+  <path d="M150 260 L170 170 L196 260 Z" fill="#FF8A8A"/><path d="M170 170 L196 260 L170 260 Z" fill="#E0323C"/>
+  <path d="M320 260 L350 176 L372 260 Z" fill="#B8F3FA"/><path d="M350 176 L372 260 L350 260 Z" fill="#4FC9DE"/>
+  <path d="M104 244 H408 L380 370 H132 Z" fill="#7C8A94"/>
+  <path d="M104 244 H408 L402 272 H110 Z" fill="#A9B6BE"/>
+  <path d="M256 272 H402 L380 370 H256 Z" fill="#000" opacity=".15"/>
+  <rect x="64" y="410" width="384" height="14" rx="7" fill="#9A9A9A"/>
+  <circle cx="180" cy="384" r="32" fill="#2B2B2B"/><circle cx="180" cy="384" r="12" fill="#7C8A94"/>
+  <circle cx="332" cy="384" r="32" fill="#2B2B2B"/><circle cx="332" cy="384" r="12" fill="#7C8A94"/>
+</svg>

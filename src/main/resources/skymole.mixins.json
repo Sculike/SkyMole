@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"package": "dev.sculike.skymole.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"client": [
+		"AbstractContainerScreenAccessor",
+		"BossHealthOverlayAccessor"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	}
+}

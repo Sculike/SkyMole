@@ -1,0 +1,199 @@
+package dev.sculike.skymole.command;
+
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.argument;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommands.literal;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+
+import dev.sculike.skymole.Branding;
+import dev.sculike.skymole.SkyMole;
+import dev.sculike.skymole.features.CorpseLoot;
+import dev.sculike.skymole.features.Markers;
+import dev.sculike.skymole.features.PowderTracker;
+import dev.sculike.skymole.hud.HudEditorScreen;
+import dev.sculike.skymole.hud.HudManager;
+import dev.sculike.skymole.hypixel.Chat;
+import dev.sculike.skymole.hypixel.Sidebar;
+import dev.sculike.skymole.hypixel.SkyBlockState;
+import dev.sculike.skymole.hypixel.TabList;
+import dev.sculike.skymole.mixin.BossHealthOverlayAccessor;
+import dev.sculike.skymole.ui.MenuScreen;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.MutableComponent;
+
+/** /skymole opens the menu; subcommands are shortcuts and debugging help. */
+public final class SkyMoleCommand {
+	private SkyMoleCommand() {}
+
+	public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+		dispatcher.register(literal("skymole")
+				.executes(ctx -> {
+					SkyMole.openNextTick(MenuScreen::new);
+					return 1;
+				})
+				.then(literal("help").executes(SkyMoleCommand::help))
+				.then(literal("hud").executes(ctx -> {
+					SkyMole.openNextTick(() -> new HudEditorScreen(null));
+					return 1;
+				}))
+				.then(literal("preview").executes(ctx -> {
+					boolean on = HudManager.togglePreview();
+					return say(ctx, on ? "Preview on: every HUD shows example data." : "Preview off.");
+				}))
+				.then(literal("powder").then(literal("reset").executes(ctx -> {
+					PowderTracker.reset();
+					return say(ctx, "Powder session reset.");
+				})))
+				.then(literal("marker")
+						.then(literal("clear").executes(ctx -> {
+							Markers.clear();
+							return say(ctx, "Marker removed.");
+						}))
+						.then(literal("set").then(argument("name", StringArgumentType.greedyString())
+								.suggests(SkyMoleCommand::suggestSpots).executes(ctx -> {
+									String name = StringArgumentType.getString(ctx, "name");
+									var pos = Markers.setCustom(name);
+									if (pos == null) return say(ctx, "Go to a mining island first.");
+									return say(ctx, name + " is now at " + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + ".");
+								})))
+						.then(literal("reset").then(argument("name", StringArgumentType.greedyString())
+								.suggests(SkyMoleCommand::suggestSpots).executes(ctx -> {
+									String name = StringArgumentType.getString(ctx, "name");
+									return say(ctx, Markers.removeCustom(name)
+											? name + " is back to the built-in spot." : "You hadn't moved " + name + ".");
+								})))
+						.then(argument("name", StringArgumentType.greedyString())
+								.suggests(SkyMoleCommand::suggestSpots).executes(ctx -> {
+									String name = StringArgumentType.getString(ctx, "name");
+									return say(ctx, Markers.markByName(name)
+											? "Marked " + name + "." : "No spot called " + name + " on this island.");
+								})))
+				.then(literal("test")
+						.then(literal("roulette").executes(ctx -> {
+							testRoulette();
+							return 1;
+						}))
+						.then(literal("bigdrop").executes(ctx -> {
+							testBigDrop();
+							return 1;
+						})))
+				.then(literal("debug").executes(SkyMoleCommand::debug)));
+	}
+
+	/** Example Lapis corpse loot, to preview the roulette without finding a corpse. */
+	public static void testRoulette() {
+		List<CorpseLoot.Reward> loot = List.of(
+				new CorpseLoot.Reward("Glacite Powder", 1050, -1),
+				new CorpseLoot.Reward("Enchanted Lapis Lazuli", 16, dev.sculike.skymole.hypixel.Prices.of("Enchanted Lapis Lazuli") * 16),
+				new CorpseLoot.Reward("Skeleton Key", 1, dev.sculike.skymole.hypixel.Prices.of("Skeleton Key")));
+		boolean fast = dev.sculike.skymole.config.SkyMoleConfig.get().fun.rouletteSpeed == 1;
+		CorpseLoot.Reward best = loot.get(2);
+		dev.sculike.skymole.ui.Cutscenes.roulette("Lapis", loot, best, fast);
+	}
+
+	/** Preview of the big-drop celebration. */
+	public static void testBigDrop() {
+		// The live price once prices have loaded, otherwise an example value.
+		double live = dev.sculike.skymole.hypixel.Prices.of("Shattered Locket");
+		dev.sculike.skymole.ui.Cutscenes.bigDrop("Shattered Locket", live > 0 ? live : 473_990_000);
+	}
+
+	private static CompletableFuture<Suggestions> suggestSpots(CommandContext<FabricClientCommandSource> ctx,
+			SuggestionsBuilder builder) {
+		String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
+		for (String name : Markers.names()) {
+			if (name.toLowerCase(Locale.ROOT).startsWith(typed)) builder.suggest(name);
+		}
+		return builder.buildFuture();
+	}
+
+	private static int help(CommandContext<FabricClientCommandSource> ctx) {
+		say(ctx, "Commands (click one to use it):");
+		helpLine(ctx, "/skymole", "open the settings menu");
+		helpLine(ctx, "/skymole hud", "move and resize the HUD panels");
+		helpLine(ctx, "/skymole preview", "show every HUD with example data");
+		helpLine(ctx, "/skymole powder reset", "start a new powder session");
+		helpLine(ctx, "/skymole marker ", "<spot>  mark a spot, e.g. Fetchur or Royal Mines");
+		helpLine(ctx, "/skymole marker set ", "<spot>  move a spot to where you stand");
+		helpLine(ctx, "/skymole marker clear", "remove the marker");
+		helpLine(ctx, "/skymole debug", "save what SkyMole reads, for bug reports");
+		return 1;
+	}
+
+	/** One help line: gold command, gray explanation. Clicking puts the command in chat. */
+	private static void helpLine(CommandContext<FabricClientCommandSource> ctx, String command, String explanation) {
+		MutableComponent line = Component.literal("  " + command).withColor(Branding.LAMP_GOLD & 0xFFFFFF)
+				.append(Component.literal("  " + explanation).withColor(Branding.TEXT_DIM & 0xFFFFFF))
+				.withStyle(style -> style
+						.withClickEvent(new ClickEvent.SuggestCommand(command))
+						.withHoverEvent(new HoverEvent.ShowText(Component.literal("Click to type " + command))));
+		ctx.getSource().sendFeedback(line);
+	}
+
+	private static int debug(CommandContext<FabricClientCommandSource> ctx) {
+		List<String> out = new ArrayList<>();
+		out.add("In SkyBlock: " + SkyBlockState.inSkyBlock());
+		out.add("Area: " + SkyBlockState.area() + "  Zone: " + SkyBlockState.zone() + "  Cold: " + SkyBlockState.cold());
+		out.add("Mining island: " + SkyBlockState.island());
+		out.add("Commissions widget found: " + SkyBlockState.commissionWidgetFound());
+		out.add("Commissions: " + SkyBlockState.commissions());
+		out.add("Powders: " + SkyBlockState.powders());
+		var tools = dev.sculike.skymole.config.SkyMoleConfig.get().tools;
+		out.add("Spread: mining=" + dev.sculike.skymole.hypixel.SpreadStats.forOre("Mithril")
+				+ " gemstone=" + dev.sculike.skymole.hypixel.SpreadStats.forOre("Ruby")
+				+ " (seen in menu: " + tools.miningSpreadSeen + " / " + tools.gemstoneSpreadSeen
+				+ ", manual: " + tools.manualSpread + ")");
+		out.add("Forge: " + dev.sculike.skymole.features.ForgeReminder.describe());
+		out.add("Prices loaded: " + dev.sculike.skymole.hypixel.Prices.loaded()
+				+ "  Paused after errors: " + dev.sculike.skymole.Safe.paused());
+		out.add("Best block: on=" + tools.bestBlock + " showOrange=" + tools.bestBlockSecond + " "
+				+ dev.sculike.skymole.features.BestBlock.describe());
+		out.add("");
+		out.add("=== Tab list widgets");
+		for (Map.Entry<String, List<String>> e : SkyBlockState.sections().entrySet()) out.add(e.getKey() + ": " + e.getValue());
+		out.add("");
+		out.add("=== Boss bars");
+		var overlay = (BossHealthOverlayAccessor) Minecraft.getInstance().gui.hud.getBossOverlay();
+		overlay.skymole$events().values().forEach(bar -> out.add(TabList.clean(bar.getName().getString())));
+		out.add("");
+		out.add("=== Sidebar: " + Sidebar.title());
+		out.addAll(Sidebar.lines());
+		out.add("");
+		out.add("=== Tab list (quotes show leading spaces)");
+		for (String line : TabList.lines()) out.add("\"" + line + "\"");
+		out.add("");
+		out.add("=== Recent chat");
+		out.addAll(Chat.recent());
+
+		Path file = FabricLoader.getInstance().getConfigDir().resolve("skymole-debug.txt");
+		try {
+			Files.write(file, out);
+		} catch (IOException e) {
+			return say(ctx, "Couldn't write debug file: " + e.getMessage());
+		}
+		return say(ctx, "Saved details to config/skymole-debug.txt");
+	}
+
+	private static int say(CommandContext<FabricClientCommandSource> ctx, String message) {
+		ctx.getSource().sendFeedback(Branding.chat(message));
+		return 1;
+	}
+}

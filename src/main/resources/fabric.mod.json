@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "skymole",
+	"version": "${version}",
+	"name": "SkyMole",
+	"description": "The mining helper for Hypixel SkyBlock: Dwarven Mines, Crystal Hollows, Glacite Tunnels and more. Commissions, powder, events, solvers and trackers.",
+	"authors": [
+		"sculike"
+	],
+	"contributors": [
+		"SkyHanni-REPO (marker locations, MIT)"
+	],
+	"contact": {},
+	"license": "MIT",
+	"icon": "assets/skymole/icon.png",
+	"environment": "client",
+	"entrypoints": {
+		"client": [
+			"dev.sculike.skymole.SkyMole"
+		],
+		"modmenu": [
+			"dev.sculike.skymole.ModMenuIntegration"
+		]
+	},
+	"mixins": [
+		"skymole.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.19.5",
+		"minecraft": "~26.2",
+		"java": ">=25",
+		"fabric-api": "*"
+	}
+}

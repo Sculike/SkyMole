@@ -1,0 +1,95 @@
+plugins {
+	id 'net.fabricmc.fabric-loom' version "${loom_version}"
+}
+
+version = project.version
+group = project.group
+
+base {
+	archivesName = project.archives_base_name
+}
+
+loom {
+	runs {
+		// `gradlew runShowcase`: dev-only run that screenshots the menu and quits.
+		showcase {
+			inherit client
+			name "Showcase"
+			vmArg "-Dskymole.showcase=true"
+		}
+		// `gradlew runShowcaseWorld`: dev-only, opens a test world, places a marker, screenshots it.
+		showcaseWorld {
+			inherit client
+			name "Showcase world"
+			vmArg "-Dskymole.showcaseWorld=true"
+		}
+	}
+}
+
+repositories {
+	// Mod Menu, for the config button in the mod list (optional at runtime).
+	maven {
+		name = "Modrinth"
+		url = "https://api.modrinth.com/maven"
+		content { includeGroup "maven.modrinth" }
+	}
+}
+
+dependencies {
+	minecraft "com.mojang:minecraft:${project.minecraft_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_api_version}"
+	compileOnly "maven.modrinth:modmenu:${project.modmenu_version}"
+
+	testImplementation "org.junit.jupiter:junit-jupiter:5.11.4"
+	testRuntimeOnly "org.junit.platform:junit-platform-launcher:1.11.4"
+}
+
+test {
+	useJUnitPlatform()
+}
+
+processResources {
+	def version = project.version
+	inputs.property "version", version
+
+	filesMatching("fabric.mod.json") {
+		expand "version": version
+	}
+}
+
+tasks.withType(JavaCompile).configureEach {
+	it.options.release = 25
+}
+
+// `gradlew installMod` builds SkyMole and copies it into your launcher's mods folder.
+// The folder is set in local.properties (personal, not shared): modsDir=C:/path/to/profile/mods
+def localProps = new Properties()
+def localFile = file("local.properties")
+if (localFile.exists()) localFile.withInputStream { localProps.load(it) }
+def modsDir = localProps.getProperty("modsDir")
+
+tasks.register("installMod", Copy) {
+	onlyIf { modsDir != null }
+	from(tasks.named("jar"))
+	into(modsDir ?: layout.buildDirectory.dir("install-skipped"))
+	def target = modsDir ? new File(modsDir) : null
+	doFirst {
+		// Remove older SkyMole builds only; other mods are never touched.
+		target?.listFiles()?.findAll { it.name.startsWith("skymole-") && it.name.endsWith(".jar") }?.each { it.delete() }
+	}
+}
+
+// Ship the license inside the jar too.
+jar {
+	from("LICENSE") {
+		rename { "LICENSE_skymole" }
+	}
+}
+
+java {
+	withSourcesJar()
+
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
+}
