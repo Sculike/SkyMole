@@ -75,8 +75,11 @@ tasks.register("installMod", Copy) {
 	into(modsDir ?: layout.buildDirectory.dir("install-skipped"))
 	def target = modsDir ? new File(modsDir) : null
 	doFirst {
-		// Remove older SkyMole builds only; other mods are never touched.
-		target?.listFiles()?.findAll { it.name.startsWith("skymole-") && it.name.endsWith(".jar") }?.each { it.delete() }
+		// Remove older SkyMole builds only; other mods are never touched. Two SkyMole jars would
+		// stop Minecraft from starting, so stop if one can't be removed (the game has it open).
+		target?.listFiles()?.findAll { it.name.startsWith("skymole-") && it.name.endsWith(".jar") }?.each {
+			if (!it.delete()) throw new GradleException("Close Minecraft first: ${it.name} is in use.")
+		}
 	}
 }
 
