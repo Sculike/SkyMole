@@ -49,6 +49,8 @@ Some features read Hypixel's tab list widgets; turn on Commissions, Powders, Pic
 
 ## Commands
 
+Press **M** to open the menu (rebind it in Options > Controls > Miscellaneous).
+
 | Command | |
 |---|---|
 | `/skymole` | open the menu |

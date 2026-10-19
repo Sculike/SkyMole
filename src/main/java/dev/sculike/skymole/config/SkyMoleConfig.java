@@ -176,6 +176,8 @@ public final class SkyMoleConfig {
 		public boolean textShadow = true;
 		/** 0 = light tint, 1 = the game's blur, 2 = nothing */
 		public int menuBackground = 0;
+		/** The one-time hello has been shown. */
+		public boolean welcomed = false;
 		/** Index into AlertSounds.NAMES, used by every SkyMole alert. */
 		public int alertSound = 0;
 		public int volumePercent = 80;

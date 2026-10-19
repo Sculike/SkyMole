@@ -12,6 +12,8 @@ import dev.sculike.skymole.features.CorpseLoot;
 import dev.sculike.skymole.features.PickobulusPreview;
 import dev.sculike.skymole.features.PuzzlerSolver;
 import dev.sculike.skymole.features.TitaniumAlert;
+import dev.sculike.skymole.features.Welcome;
+import dev.sculike.skymole.ui.Keybinds;
 import dev.sculike.skymole.hypixel.Prices;
 import dev.sculike.skymole.hypixel.SkyBlockItems;
 import dev.sculike.skymole.ui.Cutscenes;
@@ -73,6 +75,7 @@ public class SkyMole implements ClientModInitializer {
 		CorpseLoot.register();
 		Prices.start();
 		SkyBlockItems.start();
+		Keybinds.register();
 
 		// Drawn top to bottom in this order; the HUD editor shows them all.
 		HudManager.add(Events.hud());
@@ -99,6 +102,7 @@ public class SkyMole implements ClientModInitializer {
 			if (client.player == null) return;
 			// Every tick (things drawn in the world are drawn per tick). Each feature is wrapped
 			// so an error pauses only that feature instead of crashing the game.
+			Safe.run("Keybinds", () -> Keybinds.tick(client));
 			Safe.run("Waypoints", () -> Markers.tick(client));
 			Safe.run("Best next block", () -> BestBlock.tick(client));
 			Safe.run("Mob outlines", () -> MobOutlines.tick(client));
@@ -108,6 +112,7 @@ public class SkyMole implements ClientModInitializer {
 			if (++ticks < UPDATE_INTERVAL) return;
 			ticks = 0;
 			Safe.run("Reading Hypixel", SkyBlockState::update);
+			Safe.run("Welcome", Welcome::tick);
 			Safe.run("Commissions", Commissions::tick);
 			Safe.run("Waypoints", Markers::updateAuto);
 			Safe.run("Forge reminder", ForgeReminder::tick);
