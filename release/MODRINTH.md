@@ -11,8 +11,8 @@
 | Categories | Utility, Game Mechanics |
 | Environment | Client: required. Server: unsupported |
 | License | MIT |
-| Source code | your GitHub link (after uploading) |
-| Issues | your GitHub link + `/issues` |
+| Source code | https://github.com/Sculike/SkyMole |
+| Issues | https://github.com/Sculike/SkyMole/issues |
 
 ## Version 1.0.0
 

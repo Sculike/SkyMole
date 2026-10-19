@@ -10,7 +10,11 @@
 	"contributors": [
 		"SkyHanni-REPO (marker locations, MIT)"
 	],
-	"contact": {},
+	"contact": {
+		"homepage": "https://github.com/Sculike/SkyMole",
+		"sources": "https://github.com/Sculike/SkyMole",
+		"issues": "https://github.com/Sculike/SkyMole/issues"
+	},
 	"license": "MIT",
 	"icon": "assets/skymole/icon.png",
 	"environment": "client",
