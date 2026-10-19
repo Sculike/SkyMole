@@ -35,6 +35,7 @@ build.log
 run.log
 local.properties
 logs/
+push-to-github.ps1
 
 # java
 

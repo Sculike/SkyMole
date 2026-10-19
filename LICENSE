@@ -19,9 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-Marker locations and the Dwarven Mines walking network in
-src/main/resources/assets/skymole/ are based on SkyHanni-REPO (MIT),
-see src/main/resources/assets/skymole/markers-LICENSE.txt.

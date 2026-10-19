@@ -74,6 +74,8 @@ The jar ends up in `build/libs/`.
 - Marker locations and the Dwarven Mines walking network are based on [SkyHanni-REPO](https://github.com/hannibal002/SkyHanni-REPO) (MIT)
 - Prices: Hypixel's public API and moulberry's lowest BIN list
 
+See [NOTICE.md](NOTICE.md) for the details.
+
 ## License
 
 [MIT](LICENSE)
