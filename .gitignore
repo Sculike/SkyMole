@@ -48,3 +48,4 @@ replay_*.log
 # so neither is committed. stream_banner.py rebuilds the page from your own copy.
 branding/Minecraft.ttf
 branding/stream-banner.html
+branding/stream-banner.gif
