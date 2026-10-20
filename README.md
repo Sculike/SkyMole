@@ -3,6 +3,12 @@
 <h1 align="center">SkyMole</h1>
 <p align="center"><b>The mining helper for Hypixel SkyBlock.</b><br>Dwarven Mines first, with more mining islands on the way.</p>
 
+<p align="center">
+<a href="https://github.com/Sculike/SkyMole/releases/latest"><img alt="Download" src="https://img.shields.io/github/v/release/Sculike/SkyMole?label=download&color=FFC93C&style=for-the-badge"></a>
+<a href="LICENSE"><img alt="License" src="https://img.shields.io/badge/license-MIT-FFC93C?style=for-the-badge"></a>
+<img alt="Minecraft 26.2 Fabric" src="https://img.shields.io/badge/minecraft-26.2%20fabric-FFC93C?style=for-the-badge">
+</p>
+
 ---
 
 SkyMole is a client-side Fabric mod for Minecraft 26.2. Type `/skymole` in game to open the menu.
