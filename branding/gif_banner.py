@@ -83,9 +83,10 @@ def build():
     base = backdrop()
     lamp = glow()
     mole = Image.open(os.path.join(HERE, "mole-cutout.png")).convert("RGBA")
-    mole = mole.resize((180, 180), Image.NEAREST)
+    mole = mole.resize((cfg.MOLE, cfg.MOLE), Image.NEAREST)
 
-    font = ImageFont.truetype(os.path.join(HERE, "Minecraft.ttf"), 76)
+    size, _ = cfg.fit_font(cfg.LINES)
+    font = ImageFont.truetype(os.path.join(HERE, "Minecraft.ttf"), size)
     lines = [crisp_text(text, font, WHITE) for text, _ in cfg.LINES]
     shadows = [crisp_text(text, font, SHADOW)[0] for text, _ in cfg.LINES]
 
@@ -101,10 +102,10 @@ def build():
         pulse = 0.55 + 0.45 * (0.5 + 0.5 * math.sin(2 * math.pi * t / 4.2))
         lit = lamp.copy()
         lit.putalpha(lit.getchannel("A").point(lambda v: int(v * pulse)))
-        frame.paste(lit, (6, H // 2 - lit.height // 2), lit)
+        frame.paste(lit, (cfg.PAD - 24, H // 2 - lit.height // 2), lit)
 
         bob = int(round(7 * math.sin(2 * math.pi * t / 3.4)))
-        frame.paste(mole, (56, H // 2 - mole.height // 2 - bob), mole)
+        frame.paste(mole, (cfg.PAD, H // 2 - mole.height // 2 - bob), mole)
 
         for p in dust:
             # Each mote runs its own loop up the frame, wrapping round.
@@ -127,8 +128,10 @@ def build():
         if vis > 0.02:
             layer, _ = lines[slot]
             shadow = shadows[slot]
-            x, y = 280, H // 2 - layer.height // 2 + int((1 - vis) * -16)
-            for img, dx, dy in ((shadow, 5, 5), (layer, 0, 0)):
+            x = cfg.PAD + cfg.MOLE + cfg.GAP
+            y = H // 2 - layer.height // 2 + int((1 - vis) * -16)
+            off = max(4, size // 18)
+            for img, dx, dy in ((shadow, off, off), (layer, 0, 0)):
                 faded = img.copy()
                 faded.putalpha(faded.getchannel("A").point(lambda v: int(v * vis)))
                 frame.paste(faded, (x + dx, y + dy), faded)

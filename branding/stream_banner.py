@@ -72,6 +72,34 @@ def backdrop():
     return "data:image/png;base64," + base64.b64encode(png).decode()
 
 
+# Chrome around the type: side padding, the mole, and the gap after it.
+PAD, MOLE, GAP = 28, 160, 28
+
+
+def fit_font(lines):
+    """Largest size at which the longest line still fits the space beside the mole.
+
+    Measured against the real font rather than guessed, so changing the text or
+    the canvas resizes the type instead of overflowing it.
+    """
+    room_w = W - PAD - MOLE - GAP - PAD
+    room_h = H - 60  # leave air above and below, plus space for the shadow
+    try:
+        from PIL import ImageFont
+    except ImportError:
+        return 86, 110  # sensible default when Pillow is not installed
+    path = os.path.join(HERE, "Minecraft.ttf")
+    best = 20
+    for size in range(20, 220, 2):
+        font = ImageFont.truetype(path, size)
+        widest = max(font.getbbox(text)[2] - font.getbbox(text)[0] for text, _ in lines)
+        tallest = max(font.getbbox(text)[3] for text, _ in lines)
+        if widest > room_w or tallest > room_h:
+            break
+        best = size
+    return best, int(best * 1.35)
+
+
 def b64(name, mime):
     with open(os.path.join(HERE, name), "rb") as f:
         return "data:%s;base64,%s" % (mime, base64.b64encode(f.read()).decode())
@@ -121,23 +149,23 @@ HTML = """<!doctype html>
   img {{ image-rendering: pixelated; display: block; }}
 
   .stage {{ position: relative; width: {W}px; height: {H}px;
-            display: flex; align-items: center; gap: 40px; padding: 0 56px; }}
+            display: flex; align-items: center; gap: 28px; padding: 0 28px; }}
 
   /* The lamp glow behind the mole, breathing rather than blinking. */
-  .lamp {{ position: absolute; left: 30px; top: 50%; width: 280px; height: 280px;
+  .lamp {{ position: absolute; left: 10px; top: 50%; width: 260px; height: 260px;
            transform: translateY(-50%);
            background: radial-gradient(circle, rgba(255,201,60,.34) 0%, rgba(255,201,60,0) 68%);
            animation: breathe 4.2s ease-in-out infinite; }}
 
-  .mole {{ position: relative; width: 180px; height: 180px; flex: none;
+  .mole {{ position: relative; width: 160px; height: 160px; flex: none;
            animation: bob 3.4s ease-in-out infinite; }}
 
   /* One slot, three lines taking turns. Each is absolute so they share the space. */
-  .slot {{ position: relative; flex: 1; height: 110px; }}
+  .slot {{ position: relative; flex: 1; height: {SLOTPX}px; }}
   .slot span {{
     position: absolute; left: 0; top: 50%;
     font-family: "MinecraftLocal", monospace;
-    font-size: 86px; line-height: 1; white-space: nowrap;
+    font-size: {FONTPX}px; line-height: 1; white-space: nowrap;
     text-shadow: 5px 5px 0 #0A1424;
     opacity: 0; transform: translateY(-50%);
     animation: turn {CYCLE}s ease-in-out infinite;
@@ -192,7 +220,9 @@ HTML = """<!doctype html>
 
 
 if __name__ == "__main__":
-    html = HTML.format(W=W, H=H, CYCLE=CYCLE, BACKDROP=backdrop(), FONT=b64("Minecraft.ttf", "font/ttf"),
+    fontpx, slotpx = fit_font(LINES)
+    print("type fitted at", fontpx, "px")
+    html = HTML.format(W=W, H=H, CYCLE=CYCLE, FONTPX=fontpx, SLOTPX=slotpx, BACKDROP=backdrop(), FONT=b64("Minecraft.ttf", "font/ttf"),
                        ICON=b64("mole-cutout.png", "image/png"), SLOTS=slots(), DUST=particles())
     path = os.path.join(HERE, "stream-banner.html")
     with open(path, "w", encoding="utf-8") as f:
