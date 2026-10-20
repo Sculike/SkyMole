@@ -73,10 +73,15 @@ public final class CorpseLoot {
 	public static void tick() {
 		if (corpse == null || System.currentTimeMillis() - startedAt < COLLECT_MS) return;
 		String type = corpse;
-		List<Reward> loot = List.copyOf(rewards);
+		// Price them again now: a price looked up when the line arrived may have come in since.
+		List<Reward> loot = new ArrayList<>();
+		for (Reward r : rewards) {
+			double each = Prices.of(r.item());
+			loot.add(new Reward(r.item(), r.amount(), each < 0 ? -1 : each * r.amount()));
+		}
 		corpse = null;
 		rewards.clear();
-		if (!loot.isEmpty()) play(type, loot);
+		if (!loot.isEmpty()) play(type, List.copyOf(loot));
 	}
 
 	/** Plays the scenes for a corpse's loot (also used by the test buttons). */

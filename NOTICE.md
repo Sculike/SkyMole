@@ -15,6 +15,11 @@ SkyMole's own measured Dwarven Mines commission spots are not from that data.
 
 ## Prices
 
-Prices are fetched at runtime from Hypixel's public API (`api.hypixel.net`) and from
-moulberry's public lowest-BIN list (`moulberry.codes`). No data is sent anywhere; SkyMole only
-reads these.
+Prices are fetched at runtime from public APIs:
+
+- Hypixel's official API (`api.hypixel.net`) for bazaar prices and the item list
+- moulberry's lowest-BIN list (`moulberry.codes`) for auction items
+- Coflnet's SkyBlock API (`sky.coflnet.com`) for single auction items, used when that list is
+  unavailable
+
+SkyMole only reads these; it sends no data about you anywhere.

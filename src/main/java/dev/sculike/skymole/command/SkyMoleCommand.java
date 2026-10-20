@@ -162,7 +162,7 @@ public final class SkyMoleCommand {
 				+ " (seen in menu: " + tools.miningSpreadSeen + " / " + tools.gemstoneSpreadSeen
 				+ ", manual: " + tools.manualSpread + ")");
 		out.add("Forge: " + dev.sculike.skymole.features.ForgeReminder.describe());
-		out.add("Prices loaded: " + dev.sculike.skymole.hypixel.Prices.loaded()
+		out.add("Prices: " + dev.sculike.skymole.hypixel.Prices.describe()
 				+ "  Paused after errors: " + dev.sculike.skymole.Safe.paused());
 		out.add("Best block: on=" + tools.bestBlock + " showOrange=" + tools.bestBlockSecond + " "
 				+ dev.sculike.skymole.features.BestBlock.describe());

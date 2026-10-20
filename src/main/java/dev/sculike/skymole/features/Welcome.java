@@ -18,10 +18,24 @@ import net.minecraft.network.chat.MutableComponent;
 public final class Welcome {
 	private Welcome() {}
 
+	/** Hypixel spams chat when you join, so wait until that has passed. */
+	private static final long DELAY_MS = 8_000;
+	private static long joinedAt;
+
 	/** Called after every state update. */
 	public static void tick() {
 		SkyMoleConfig config = SkyMoleConfig.get();
-		if (config.general.welcomed || !SkyBlockState.inSkyBlock()) return;
+		if (config.general.welcomed) return;
+		if (!SkyBlockState.inSkyBlock()) {
+			joinedAt = 0;
+			return;
+		}
+		long now = System.currentTimeMillis();
+		if (joinedAt == 0) {
+			joinedAt = now;
+			return;
+		}
+		if (now - joinedAt < DELAY_MS) return;
 		config.general.welcomed = true;
 		SkyMoleConfig.save();
 
