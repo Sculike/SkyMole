@@ -83,15 +83,26 @@ Made by **sculike**. Marker locations and the Dwarven Mines walking network are 
 
 ---
 
-## Gallery: what to record (in this order of importance)
+## Gallery
 
-1. **GIF: Big drop** (`/skymole test bigdrop`): the eye-catcher, put it first
-2. **GIF: the mining route**: green/orange blocks moving along as you mine Mithril
-3. **GIF: right-click a commission → route line → arrive → checkpoint ✔**
-4. **GIF: corpse roulette** (`/skymole test roulette`)
-5. **Screenshot: the menu** (`/skymole`, Commissions tab)
-6. **Screenshot: HUD while mining**: commissions, powder, tools panels
-7. **Screenshot: Pickobulus preview** with the block count
-8. **Screenshot: auto waypoints** with beams in the Dwarven Mines
+Upload the files from `release/gallery/` in this order. Modrinth lets you give each one a title
+and a description; suggestions below.
 
-Tips: hide F3, use GUI scale 2 or 3, record at 1080p. The SkyMole watermark in the big drop is already there for clips.
+| # | File | Title | Description |
+|---|---|---|---|
+| 1 | `01-big-drop.png` | Big drop celebration | A rare corpse drop worth more than 10m gets its own moment, with the real item and a rolling coin counter. |
+| 2 | `02-overview.png` | Everything at a glance | Commissions, powder per hour, pickaxe ability, forge timers and a waypoint with its distance. |
+| 3 | `03-corpse-roulette.png` | Corpse roulette | Looting a Mineshaft corpse spins a case-opening reel with live prices. |
+| 4 | `04-mining-route.png` | Best next block | Green is the block to mine now, orange is the one after, based on your Mining Spread. |
+| 5 | `05-pickobulus.png` | Pickobulus preview | See exactly which blocks your ability will break before you throw it. |
+| 6 | `06-menu.png` | Settings | Press M or type /skymole. Every feature can be turned off. |
+| 7 | `07-commission-waypoint.png` | Waypoints from the menu | Right-click a commission for a waypoint and the fastest walking route. |
+| 8 | `08-titanium-alert.png` | Titanium alert | Get told the moment Titanium appears next to you. |
+| 9 | `09-big-drop-full.png` | Big drop, in context | The same celebration with the HUD around it. |
+
+Modrinth's featured image is the first one, and it also shows as a small thumbnail, so keep
+`01-big-drop.png` first: it reads well even when small.
+
+### Later, for a trailer or TikTok
+GIFs of the mining route and of right-clicking a commission into a route line are the most
+convincing moving shots. ShareX or ScreenToGif both record them for free.
