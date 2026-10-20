@@ -41,9 +41,18 @@ public final class Events {
 
 	/** "Find the Powder Ghast near the Divan's Gateway!" */
 	private static final Pattern POWDER_GHAST = Pattern.compile("^Find the Powder Ghast near the (.+?)!");
+	/** "The Mithril Gourmand event starts in 20 seconds!" */
+	private static final Pattern STARTS_IN = Pattern.compile("The (.+?) event starts in (\\d+) seconds?", Pattern.CASE_INSENSITIVE);
+	/** Events already warned about, so each warning is given once. */
+	private static final java.util.Set<String> endWarned = new java.util.HashSet<>();
 
 	public static void register() {
 		Chat.listen(text -> {
+			Matcher soon = STARTS_IN.matcher(text);
+			if (soon.find() && SkyMoleConfig.get().events.startingSoonAlert) {
+				Alerts.show(soon.group(1) + " in " + soon.group(2) + "s!", "Get ready");
+				return;
+			}
 			Matcher ghast = POWDER_GHAST.matcher(text);
 			if (ghast.find() && SkyMoleConfig.get().events.powderGhastAlert) {
 				String place = ghast.group(1).trim();
@@ -92,7 +101,18 @@ public final class Events {
 			if (!active.containsKey(name) && config.startAlert) Alerts.show(pretty(name) + " started!", now.get(name).where());
 		}
 		for (String name : active.keySet()) {
-			if (!now.containsKey(name) && config.endAlert) Alerts.chat(pretty(name) + " ended.");
+			if (!now.containsKey(name)) {
+				endWarned.remove(name);
+				if (config.endAlert) Alerts.chat(pretty(name) + " ended.");
+			}
+		}
+		// Nearly over: the last chance to hand in your Mithril, or to get to the event at all.
+		if (config.endingSoonSeconds > 0) {
+			for (Event e : now.values()) {
+				int left = secondsLeft(e.timeLeft());
+				if (left < 0 || left > config.endingSoonSeconds || !endWarned.add(e.name())) continue;
+				Alerts.show(pretty(e.name()) + " ending!", left + " seconds left");
+			}
 		}
 		active = now;
 	}
@@ -110,6 +130,19 @@ public final class Events {
 			return new Event(name, place, timeLeft);
 		}
 		return null;
+	}
+
+	/** "02:05" or "1:02:05" to seconds, or -1 if there's no time on the bar. */
+	static int secondsLeft(String time) {
+		if (time == null || time.isEmpty()) return -1;
+		String[] parts = time.split(":");
+		int total = 0;
+		try {
+			for (String part : parts) total = total * 60 + Integer.parseInt(part.trim());
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+		return total;
 	}
 
 	/** "GOBLIN RAID" -> "Goblin Raid", "2X POWDER" -> "2x Powder". */

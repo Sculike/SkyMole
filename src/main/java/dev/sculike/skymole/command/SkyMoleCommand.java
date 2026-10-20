@@ -20,6 +20,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import dev.sculike.skymole.Branding;
 import dev.sculike.skymole.SkyMole;
+import dev.sculike.skymole.config.SkyMoleConfig;
 import dev.sculike.skymole.features.CorpseLoot;
 import dev.sculike.skymole.features.Markers;
 import dev.sculike.skymole.features.PowderTracker;
@@ -95,7 +96,33 @@ public final class SkyMoleCommand {
 							testBigDrop();
 							return 1;
 						})))
+				.then(literal("alias")
+						.executes(SkyMoleCommand::listAliases)
+						.then(literal("add").then(argument("short", StringArgumentType.word())
+								.then(argument("command", StringArgumentType.greedyString()).executes(ctx -> {
+									String shortName = StringArgumentType.getString(ctx, "short").toLowerCase(Locale.ROOT);
+									String full = StringArgumentType.getString(ctx, "command").trim();
+									SkyMoleConfig.get().commands.aliases.put(shortName, full);
+									SkyMoleConfig.save();
+									return say(ctx, "/" + shortName + " now runs /" + full
+											+ ". It works after you rejoin the server.");
+								}))))
+						.then(literal("remove").then(argument("short", StringArgumentType.word()).executes(ctx -> {
+							String shortName = StringArgumentType.getString(ctx, "short").toLowerCase(Locale.ROOT);
+							boolean removed = SkyMoleConfig.get().commands.aliases.remove(shortName) != null;
+							if (removed) SkyMoleConfig.save();
+							return say(ctx, removed ? "/" + shortName + " removed. Gone after you rejoin."
+									: "There's no /" + shortName + " shortcut.");
+						}))))
 				.then(literal("debug").executes(SkyMoleCommand::debug)));
+	}
+
+	private static int listAliases(CommandContext<FabricClientCommandSource> ctx) {
+		var aliases = SkyMoleConfig.get().commands.aliases;
+		if (aliases.isEmpty()) return say(ctx, "No shortcuts. Add one with /skymole alias add <short> <command>");
+		say(ctx, "Shortcuts:");
+		aliases.forEach((shortName, full) -> helpLine(ctx, "/" + shortName, "runs /" + full));
+		return 1;
 	}
 
 	/** Example Lapis corpse loot, to preview the roulette without finding a corpse. */
@@ -134,6 +161,7 @@ public final class SkyMoleCommand {
 		helpLine(ctx, "/skymole marker ", "<spot>  mark a spot, e.g. Fetchur or Royal Mines");
 		helpLine(ctx, "/skymole marker set ", "<spot>  move a spot to where you stand");
 		helpLine(ctx, "/skymole marker clear", "remove the marker");
+		helpLine(ctx, "/skymole alias", "short commands, e.g. /don for /tptodonexpresso");
 		helpLine(ctx, "/skymole debug", "save what SkyMole reads, for bug reports");
 		return 1;
 	}

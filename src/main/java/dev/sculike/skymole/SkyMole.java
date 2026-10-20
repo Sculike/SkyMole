@@ -2,6 +2,7 @@ package dev.sculike.skymole;
 
 import java.util.function.Supplier;
 
+import dev.sculike.skymole.command.Aliases;
 import dev.sculike.skymole.command.SkyMoleCommand;
 import dev.sculike.skymole.config.SkyMoleConfig;
 import dev.sculike.skymole.dev.DevShowcase;
@@ -28,6 +29,7 @@ import dev.sculike.skymole.features.Fetchur;
 import dev.sculike.skymole.features.ForgeReminder;
 import dev.sculike.skymole.features.MiningInfo;
 import dev.sculike.skymole.features.PowderTracker;
+import dev.sculike.skymole.features.ProfitTracker;
 import dev.sculike.skymole.features.Tools;
 import dev.sculike.skymole.hud.HudManager;
 import dev.sculike.skymole.hypixel.Chat;
@@ -66,6 +68,7 @@ public class SkyMole implements ClientModInitializer {
 		Commissions.register();
 		ForgeReminder.register();
 		PowderTracker.register();
+		ProfitTracker.register();
 		Events.register();
 		Tools.register();
 		MiningInfo.register();
@@ -84,6 +87,7 @@ public class SkyMole implements ClientModInitializer {
 		HudManager.add(Tools.hud());
 		HudManager.add(MiningInfo.hud());
 		HudManager.add(Markers.hud());
+		HudManager.add(ProfitTracker.hud());
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(Branding.MOD_ID, "hud"),
 				(g, delta) -> Safe.run("HUD", () -> HudManager.render(g, delta)));
 		// Cutscenes (corpse roulette, big drops) draw on top of everything.
@@ -124,7 +128,10 @@ public class SkyMole implements ClientModInitializer {
 			Safe.run("Learning item icons", () -> SkyBlockItems.learn(client.player));
 		});
 
-		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> SkyMoleCommand.register(dispatcher));
+		ClientCommandRegistrationCallback.EVENT.register((dispatcher, context) -> {
+			SkyMoleCommand.register(dispatcher);
+			Safe.run("Command shortcuts", () -> Aliases.register(dispatcher));
+		});
 
 		LOGGER.info("{} loaded", Branding.NAME);
 	}

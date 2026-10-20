@@ -81,6 +81,51 @@ public final class SkyMoleConfig {
 		public boolean endAlert = false;
 		public boolean goblinAlert = true;
 		public boolean powderGhastAlert = true;
+		/** Hypixel's "starts in 20 seconds" warning, as a title you can't miss. */
+		public boolean startingSoonAlert = true;
+		/** Warn this many seconds before a running event ends (0 = off). */
+		public int endingSoonSeconds = 20;
+	}
+
+	/** Totals for the profit tracker. */
+	public static final class Totals {
+		public long mithril;
+		public long gemstone;
+		public long glacite;
+		public double coins;
+		public long millis;
+
+		public void clear() {
+			mithril = 0;
+			gemstone = 0;
+			glacite = 0;
+			coins = 0;
+			millis = 0;
+		}
+	}
+
+	public static final class Tracker {
+		public Hud hud = new Hud(4, 320, false);
+		/** Index into {@link #SCOPES}. */
+		public int scope = 0;
+		public boolean powder = true;
+		public boolean coins = true;
+		public boolean perHour = true;
+		public Totals today = new Totals();
+		public Totals allTime = new Totals();
+		/** The day the "today" totals belong to, so they reset by themselves. */
+		public String todayDate = "";
+
+		public static final String[] SCOPES = {"Session", "Today", "All time"};
+	}
+
+	/** Short commands that run a longer Hypixel command. */
+	public static final class Commands {
+		public java.util.Map<String, String> aliases = new java.util.LinkedHashMap<>();
+
+		public Commands() {
+			aliases.put("don", "tptodonexpresso");
+		}
 	}
 
 	public static final class Tools {
@@ -192,6 +237,8 @@ public final class SkyMoleConfig {
 	public Markers markers = new Markers();
 	public Forge forge = new Forge();
 	public Fun fun = new Fun();
+	public Tracker tracker = new Tracker();
+	public Commands commands = new Commands();
 	public General general = new General();
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

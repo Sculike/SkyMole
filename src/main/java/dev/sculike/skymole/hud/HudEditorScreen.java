@@ -94,6 +94,7 @@ public class HudEditorScreen extends Screen {
 			case "Events" -> defaults.events.hud;
 			case "Tools" -> defaults.tools.hud;
 			case "Marker" -> defaults.markers.hud;
+			case "Profit" -> defaults.tracker.hud;
 			default -> defaults.area.hud;
 		};
 	}

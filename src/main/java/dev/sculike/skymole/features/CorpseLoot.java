@@ -88,7 +88,10 @@ public final class CorpseLoot {
 	public static void play(String corpseType, List<Reward> loot) {
 		SkyMoleConfig.Fun fun = SkyMoleConfig.get().fun;
 		Reward best = loot.get(0);
-		for (Reward r : loot) if (r.value() > best.value()) best = r;
+		for (Reward r : loot) {
+			if (r.value() > best.value()) best = r;
+			ProfitTracker.addCoins(r.value());
+		}
 
 		boolean big = fun.bigDrop && best.value() >= fun.bigDropMillions * 1_000_000.0;
 		if (fun.corpseRoulette) Cutscenes.roulette(corpseType, loot, best, fun.rouletteSpeed == 1);

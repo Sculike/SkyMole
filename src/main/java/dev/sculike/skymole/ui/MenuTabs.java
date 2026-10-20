@@ -8,6 +8,7 @@ import dev.sculike.skymole.features.Alerts;
 import dev.sculike.skymole.features.AlertSounds;
 import dev.sculike.skymole.features.Commissions;
 import dev.sculike.skymole.features.PowderTracker;
+import dev.sculike.skymole.features.ProfitTracker;
 import dev.sculike.skymole.ui.MenuEntry.Button;
 import dev.sculike.skymole.ui.MenuEntry.Cycle;
 import dev.sculike.skymole.ui.MenuEntry.Description;
@@ -32,6 +33,7 @@ final class MenuTabs {
 		SkyMoleConfig.Area ar = c.area;
 		SkyMoleConfig.General gen = c.general;
 		SkyMoleConfig.Markers mk = c.markers;
+		SkyMoleConfig.Tracker tr = c.tracker;
 
 		List<MenuTab> tabs = new ArrayList<>();
 
@@ -78,7 +80,20 @@ final class MenuTabs {
 				new Toggle("Treasure chests", () -> pw.chests, v -> pw.chests = v, d.powder.chests),
 				new Button("Reset session", () -> {
 					PowderTracker.reset();
+					ProfitTracker.resetSession();
 					Alerts.chat("Powder session reset.");
+				}),
+				new Header("Profit"),
+				new Description("Powder exactly, plus coins for drops Hypixel names in chat."),
+				new Toggle("Show profit HUD", () -> tr.hud.enabled, v -> tr.hud.enabled = v, d.tracker.hud.enabled),
+				new Cycle("Count", SkyMoleConfig.Tracker.SCOPES, () -> tr.scope, v -> tr.scope = v, d.tracker.scope),
+				new Toggle("Powder", () -> tr.powder, v -> tr.powder = v, d.tracker.powder),
+				new Toggle("Coins", () -> tr.coins, v -> tr.coins = v, d.tracker.coins),
+				new Toggle("Per hour", () -> tr.perHour, v -> tr.perHour = v, d.tracker.perHour),
+				new Description("Ores going into your sacks aren't named by Hypixel, so they can't be counted."),
+				new Button("Reset what's shown", () -> {
+					ProfitTracker.reset(tr.scope);
+					Alerts.chat(SkyMoleConfig.Tracker.SCOPES[tr.scope] + " profit reset.");
 				}))));
 
 		tabs.add(new MenuTab("Events", Items.CLOCK, List.of(
@@ -87,6 +102,11 @@ final class MenuTabs {
 				new Toggle("Show events HUD", () -> ev.hud.enabled, v -> ev.hud.enabled = v, d.events.hud.enabled),
 				new Toggle("Alert when an event starts", () -> ev.startAlert, v -> ev.startAlert = v, d.events.startAlert),
 				new Toggle("Message when an event ends", () -> ev.endAlert, v -> ev.endAlert = v, d.events.endAlert),
+				new Toggle("Alert when an event is about to start", () -> ev.startingSoonAlert,
+						v -> ev.startingSoonAlert = v, d.events.startingSoonAlert),
+				new Slider("Warn before an event ends", () -> ev.endingSoonSeconds, v -> ev.endingSoonSeconds = v,
+						0, 60, 5, d.events.endingSoonSeconds, "s"),
+				new Description("Handy for Mithril Gourmand: hand in before the time runs out."),
 				new Header("Goblins"),
 				new Toggle("Golden and Diamond Goblin alert", () -> ev.goblinAlert,
 						v -> ev.goblinAlert = v, d.events.goblinAlert),

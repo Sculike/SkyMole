@@ -69,7 +69,10 @@ public final class PowderTracker {
 			start.putIfAbsent(type, value);
 			Long previous = last.put(type, value);
 			if (previous == null) continue;
-			if (value > previous) gained = true;
+			if (value > previous) {
+				gained = true;
+				ProfitTracker.addPowder(type, value - previous);
+			}
 			// Spending powder (HOTM) shouldn't count as negative progress.
 			if (value < previous) start.put(type, start.get(type) - (previous - value));
 		}
@@ -77,7 +80,11 @@ public final class PowderTracker {
 
 		int pauseMinutes = SkyMoleConfig.get().powder.pauseAfterMinutes;
 		boolean active = lastGain > 0 && (pauseMinutes == 0 || now - lastGain < pauseMinutes * 60_000L);
-		if (active && lastTick > 0) activeMillis += Math.min(now - lastTick, 5_000);
+		if (active && lastTick > 0) {
+			long spent = Math.min(now - lastTick, 5_000);
+			activeMillis += spent;
+			ProfitTracker.addActive(spent);
+		}
 		lastTick = now;
 	}
 

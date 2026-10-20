@@ -31,6 +31,15 @@ class ParsersTest {
 	}
 
 	@Test
+	void timeLeftOnTheBossBar() {
+		assertEquals(125, Events.secondsLeft("02:05"));
+		assertEquals(20, Events.secondsLeft("00:20"));
+		assertEquals(3725, Events.secondsLeft("1:02:05"));
+		assertEquals(-1, Events.secondsLeft(""));
+		assertEquals(-1, Events.secondsLeft("soon"));
+	}
+
+	@Test
 	void fetchur() {
 		assertEquals("20x Yellow Stained Glass", Fetchur.answer("[NPC] Fetchur: its yellow and see through"));
 		assertNull(Fetchur.answer("[NPC] Fetchur: something new"));
