@@ -6,6 +6,8 @@ anywhere without breaking, which matters because OBS stores only a path.
 import base64
 import os
 import random
+import struct
+import zlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -19,11 +21,53 @@ CYAN = "#4FC9DE"
 PINK = "#F29BB0"
 CREAM = "#F5EFE6"
 
+# A cave-blue ramp, never fully black, so the gold reads against every shade of it.
+BLUES = [
+    (0x0A, 0x14, 0x24), (0x0D, 0x19, 0x2B), (0x10, 0x1E, 0x33), (0x13, 0x24, 0x3B),
+    (0x16, 0x2A, 0x44), (0x1A, 0x31, 0x4D), (0x1E, 0x38, 0x57), (0x22, 0x40, 0x62),
+    (0x27, 0x49, 0x6E), (0x2C, 0x52, 0x7A),
+]
+# Block size of the background tiles, matching the chunky look of the banners.
+BLOCK = 20
+
 LINES = [
     ("SkyMole", GOLD),
     ("By Sculike", CREAM),
     ("!Discord", GOLD),
 ]
+
+
+def _chunk(tag, data):
+    out = struct.pack(">I", len(data)) + tag + data
+    return out + struct.pack(">I", zlib.crc32(tag + data) & 0xFFFFFFFF)
+
+
+def backdrop():
+    """A blue block field, many shades, darker towards the edges so text stays readable."""
+    random.seed(19)  # fixed, so the wall does not rearrange itself on every rebuild
+    cols, rows = W // BLOCK + 1, H // BLOCK + 1
+    grid = []
+    for row in range(rows):
+        line = []
+        for col in range(cols):
+            # Edges lean dark, the middle leans light: a vignette built from shades.
+            edge = min(col, cols - 1 - col) / (cols / 2) + min(row, rows - 1 - row) / (rows / 2)
+            base = int(edge * 3.2) + random.randint(0, 3)
+            line.append(BLUES[max(0, min(len(BLUES) - 1, base))])
+        grid.append(line)
+
+    raw = bytearray()
+    for y in range(H):
+        raw.append(0)
+        line = grid[y // BLOCK]
+        for x in range(W):
+            raw.extend(line[x // BLOCK])
+    signature = bytes([137, 80, 78, 71, 13, 10, 26, 10])
+    png = (signature
+           + _chunk(b"IHDR", struct.pack(">IIBBBBB", W, H, 8, 2, 0, 0, 0))
+           + _chunk(b"IDAT", zlib.compress(bytes(raw), 9))
+           + _chunk(b"IEND", b""))
+    return "data:image/png;base64," + base64.b64encode(png).decode()
 
 
 def b64(name, mime):
@@ -61,15 +105,17 @@ HTML = """<!doctype html>
 <title>SkyMole stream banner</title>
 <style>
   /* OBS: add a Browser source, tick Local file, point it here, size {W}x{H}.
-     Transparent by default. Add ?solid to the URL for a dark bar behind it. */
+     Blue background by default. Add ?clear to the URL for a transparent overlay. */
   @font-face {{
     font-family: "MinecraftLocal";
     src: url("{FONT}") format("truetype");
     font-display: block;
   }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-  html, body {{ width: {W}px; height: {H}px; overflow: hidden; background: transparent; }}
-  body.solid {{ background: #120C08; }}
+  html, body {{ width: {W}px; height: {H}px; overflow: hidden; }}
+  body {{ background: url("{BACKDROP}") center / {W}px {H}px no-repeat; }}
+  /* ?clear drops the background for a transparent overlay instead. */
+  body.clear {{ background: none; }}
   img {{ image-rendering: pixelated; display: block; }}
 
   .stage {{ position: relative; width: {W}px; height: {H}px;
@@ -137,14 +183,14 @@ HTML = """<!doctype html>
 </div>
 
 <script>
-  // ?solid in the URL swaps the transparent background for a dark bar.
-  if (location.search.includes("solid")) document.body.classList.add("solid");
+  // ?clear in the URL drops the blue background for a transparent overlay.
+  if (location.search.includes("clear")) document.body.classList.add("clear");
 </script>
 """
 
 
 if __name__ == "__main__":
-    html = HTML.format(W=W, H=H, CYCLE=CYCLE, FONT=b64("Minecraft.ttf", "font/ttf"),
+    html = HTML.format(W=W, H=H, CYCLE=CYCLE, BACKDROP=backdrop(), FONT=b64("Minecraft.ttf", "font/ttf"),
                        ICON=b64("icon-128.png", "image/png"), SLOTS=slots(), DUST=particles())
     path = os.path.join(HERE, "stream-banner.html")
     with open(path, "w", encoding="utf-8") as f:
