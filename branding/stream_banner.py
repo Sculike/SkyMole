@@ -30,10 +30,12 @@ BLUES = [
 # Block size of the background tiles, matching the chunky look of the banners.
 BLOCK = 20
 
+WHITE = "#FFFFFF"
+
 LINES = [
-    ("SkyMole", GOLD),
-    ("By Sculike", CREAM),
-    ("!Discord", GOLD),
+    ("SkyMole", WHITE),
+    ("By Sculike", WHITE),
+    ("!Discord", WHITE),
 ]
 
 
@@ -127,16 +129,16 @@ HTML = """<!doctype html>
            background: radial-gradient(circle, rgba(255,201,60,.34) 0%, rgba(255,201,60,0) 68%);
            animation: breathe 4.2s ease-in-out infinite; }}
 
-  .mole {{ position: relative; width: 150px; height: 150px; flex: none;
+  .mole {{ position: relative; width: 180px; height: 180px; flex: none;
            animation: bob 3.4s ease-in-out infinite; }}
 
   /* One slot, three lines taking turns. Each is absolute so they share the space. */
-  .slot {{ position: relative; flex: 1; height: 86px; }}
+  .slot {{ position: relative; flex: 1; height: 110px; }}
   .slot span {{
     position: absolute; left: 0; top: 50%;
     font-family: "MinecraftLocal", monospace;
-    font-size: 62px; line-height: 1; white-space: nowrap;
-    text-shadow: 4px 4px 0 #140D08;
+    font-size: 86px; line-height: 1; white-space: nowrap;
+    text-shadow: 5px 5px 0 #0A1424;
     opacity: 0; transform: translateY(-50%);
     animation: turn {CYCLE}s ease-in-out infinite;
   }}
@@ -191,7 +193,7 @@ HTML = """<!doctype html>
 
 if __name__ == "__main__":
     html = HTML.format(W=W, H=H, CYCLE=CYCLE, BACKDROP=backdrop(), FONT=b64("Minecraft.ttf", "font/ttf"),
-                       ICON=b64("icon-128.png", "image/png"), SLOTS=slots(), DUST=particles())
+                       ICON=b64("mole-cutout.png", "image/png"), SLOTS=slots(), DUST=particles())
     path = os.path.join(HERE, "stream-banner.html")
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
