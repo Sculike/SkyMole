@@ -43,3 +43,8 @@ hs_err_*.log
 replay_*.log
 *.hprof
 *.jfr
+
+# Stream overlay: the font is a third-party file and the built page embeds it,
+# so neither is committed. stream_banner.py rebuilds the page from your own copy.
+branding/Minecraft.ttf
+branding/stream-banner.html

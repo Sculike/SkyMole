@@ -1,32 +1,41 @@
 """Builds stream-banner.html: a self-contained animated overlay for OBS.
 
-Every image is embedded as base64 so the file can be moved anywhere without
-breaking, which matters because OBS keeps only a path to it.
+The font and the icon are embedded as base64 so the file can be moved
+anywhere without breaking, which matters because OBS stores only a path.
 """
 import base64
 import os
+import random
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 # Sized to the content: a corner badge, not an empty full-width bar.
-W, H = 980, 300
+W, H = 900, 260
+# Seconds for one full rotation through the three lines.
+CYCLE = 12
+
 GOLD = "#FFC93C"
 CYAN = "#4FC9DE"
 PINK = "#F29BB0"
 CREAM = "#F5EFE6"
 
+LINES = [
+    ("SkyMole", GOLD),
+    ("By Sculike", CREAM),
+    ("!Discord", GOLD),
+]
 
-def b64(name):
+
+def b64(name, mime):
     with open(os.path.join(HERE, name), "rb") as f:
-        return "data:image/png;base64," + base64.b64encode(f.read()).decode()
+        return "data:%s;base64,%s" % (mime, base64.b64encode(f.read()).decode())
 
 
 def particles(count=20):
     """Powder drifting up, staggered so it never looks like a loop."""
-    import random
     random.seed(7)  # fixed, so rebuilding does not reshuffle the look
     out = []
-    for i in range(count):
+    for _ in range(count):
         left = random.uniform(2, 98)
         size = random.choice([4, 4, 6, 6, 8])
         colour = random.choice([GOLD, CYAN, CREAM, PINK])
@@ -39,12 +48,25 @@ def particles(count=20):
     return "\n    ".join(out)
 
 
+def slots():
+    step = CYCLE / len(LINES)
+    out = []
+    for i, (text, colour) in enumerate(LINES):
+        out.append(f'<span style="color:{colour};animation-delay:{i * step:.2f}s">{text}</span>')
+    return "\n    ".join(out)
+
+
 HTML = """<!doctype html>
 <meta charset="utf-8">
 <title>SkyMole stream banner</title>
 <style>
-  /* OBS: add a Browser source, point it at this file, size {W}x{H}.
+  /* OBS: add a Browser source, tick Local file, point it here, size {W}x{H}.
      Transparent by default. Add ?solid to the URL for a dark bar behind it. */
+  @font-face {{
+    font-family: "MinecraftLocal";
+    src: url("{FONT}") format("truetype");
+    font-display: block;
+  }}
   * {{ margin: 0; padding: 0; box-sizing: border-box; }}
   html, body {{ width: {W}px; height: {H}px; overflow: hidden; background: transparent; }}
   body.solid {{ background: #120C08; }}
@@ -59,26 +81,19 @@ HTML = """<!doctype html>
            background: radial-gradient(circle, rgba(255,201,60,.34) 0%, rgba(255,201,60,0) 68%);
            animation: breathe 4.2s ease-in-out infinite; }}
 
-  .mole {{ position: relative; width: 170px; height: 170px; flex: none;
+  .mole {{ position: relative; width: 150px; height: 150px; flex: none;
            animation: bob 3.4s ease-in-out infinite; }}
 
-  .words {{ position: relative; display: flex; flex-direction: column; gap: 20px; }}
-
-  /* Shimmer: a soft band travelling across the wordmark, masked to the glyphs. */
-  .mark {{ position: relative; width: 560px; }}
-  .mark img {{ width: 100%; }}
-  .mark::after {{
-    content: ""; position: absolute; inset: 0;
-    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,.85) 50%, transparent 62%);
-    -webkit-mask: var(--mark) no-repeat center / 100% 100%;
-    mask: var(--mark) no-repeat center / 100% 100%;
-    animation: sweep 5.6s ease-in-out infinite;
+  /* One slot, three lines taking turns. Each is absolute so they share the space. */
+  .slot {{ position: relative; flex: 1; height: 86px; }}
+  .slot span {{
+    position: absolute; left: 0; top: 50%;
+    font-family: "MinecraftLocal", monospace;
+    font-size: 62px; line-height: 1; white-space: nowrap;
+    text-shadow: 4px 4px 0 #140D08;
+    opacity: 0; transform: translateY(-50%);
+    animation: turn {CYCLE}s ease-in-out infinite;
   }}
-
-  .tagline img {{ width: 470px; }}
-  .cta {{ display: flex; align-items: center; gap: 14px; margin-top: 6px; }}
-  .cta img {{ width: 360px; animation: pulse 2.6s ease-in-out infinite; }}
-  .dot {{ width: 12px; height: 12px; background: {GOLD}; animation: pulse 2.6s ease-in-out infinite; }}
 
   /* Powder rising from the floor. */
   .dust {{ position: absolute; inset: 0; overflow: hidden; pointer-events: none; }}
@@ -88,8 +103,14 @@ HTML = """<!doctype html>
   @keyframes bob {{ 0%,100% {{ transform: translateY(0); }} 50% {{ transform: translateY(-14px); }} }}
   @keyframes breathe {{ 0%,100% {{ opacity: .55; transform: translateY(-50%) scale(1); }}
                         50% {{ opacity: 1; transform: translateY(-50%) scale(1.08); }} }}
-  @keyframes sweep {{ 0%, 62% {{ transform: translateX(-120%); }} 100% {{ transform: translateX(120%); }} }}
-  @keyframes pulse {{ 0%,100% {{ opacity: .55; }} 50% {{ opacity: 1; }} }}
+  /* Fade up, hold, fade out, then wait while the other two take their turn. */
+  @keyframes turn {{
+    0%   {{ opacity: 0; transform: translateY(-20%); }}
+    4%   {{ opacity: 1; transform: translateY(-50%); }}
+    29%  {{ opacity: 1; transform: translateY(-50%); }}
+    33%  {{ opacity: 0; transform: translateY(-80%); }}
+    100% {{ opacity: 0; transform: translateY(-80%); }}
+  }}
   @keyframes rise {{
     0%   {{ transform: translate(0, 0); opacity: 0; }}
     12%  {{ opacity: .95; }}
@@ -98,17 +119,17 @@ HTML = """<!doctype html>
   }}
 
   @media (prefers-reduced-motion: reduce) {{
-    .mole, .lamp, .mark::after, .cta img, .dot, .dust i {{ animation: none; }}
+    .mole, .lamp, .dust i {{ animation: none; }}
+    .slot span {{ animation: none; opacity: 0; }}
+    .slot span:first-child {{ opacity: 1; }}
   }}
 </style>
 
 <div class="stage">
   <div class="lamp"></div>
   <img class="mole" src="{ICON}" alt="SkyMole">
-  <div class="words">
-    <div class="mark" style="--mark:url('{MARK}')"><img src="{MARK}" alt="SkyMole"></div>
-    <div class="tagline"><img src="{TAG}" alt="A mining mod for Hypixel SkyBlock"></div>
-    <div class="cta"><span class="dot"></span><img src="{CTA}" alt="Modrinth, search SkyMole"></div>
+  <div class="slot">
+    {SLOTS}
   </div>
   <div class="dust">
     {DUST}
@@ -123,8 +144,8 @@ HTML = """<!doctype html>
 
 
 if __name__ == "__main__":
-    html = HTML.format(W=W, H=H, GOLD=GOLD, ICON=b64("icon-128.png"), MARK=b64("wordmark.png"),
-                       TAG=b64("tagline.png"), CTA=b64("cta.png"), DUST=particles())
+    html = HTML.format(W=W, H=H, CYCLE=CYCLE, FONT=b64("Minecraft.ttf", "font/ttf"),
+                       ICON=b64("icon-128.png", "image/png"), SLOTS=slots(), DUST=particles())
     path = os.path.join(HERE, "stream-banner.html")
     with open(path, "w", encoding="utf-8") as f:
         f.write(html)
