@@ -38,7 +38,15 @@ First release! Dwarven Mines focused:
 
 ---
 
-## Description (paste into the big description box)
+## Description
+
+Paste the whole of [`DESCRIPTION.md`](DESCRIPTION.md) into the description box. It embeds the
+gallery images straight from GitHub, so the page is illustrated from the start. The plain version
+below is kept as a fallback.
+
+<details>
+<summary>Plain version without images</summary>
+
 
 # ⛏ SkyMole
 
@@ -80,6 +88,8 @@ SkyMole only shows what you could see yourself: **no macros, no automation, no x
 
 ## Credits
 Made by **sculike**. Marker locations and the Dwarven Mines walking network are based on [SkyHanni-REPO](https://github.com/hannibal002/SkyHanni-REPO) (MIT).
+
+</details>
 
 ---
 
