@@ -183,6 +183,8 @@ public final class SkyMoleConfig {
 		public boolean bigDrop = true;
 		/** Celebrate drops worth at least this many million coins. */
 		public int bigDropMillions = 10;
+		/** A small silent pop by the crosshair when Compact procs while mining. */
+		public boolean compactPop = true;
 		/** Learned in-game item looks: SkyBlock ID -> resource pack item model. */
 		public java.util.Map<String, String> learnedIcons = new java.util.HashMap<>();
 	}

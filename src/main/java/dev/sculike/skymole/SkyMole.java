@@ -9,6 +9,7 @@ import dev.sculike.skymole.dev.DevShowcase;
 import dev.sculike.skymole.dev.DevShowcaseWorld;
 import dev.sculike.skymole.features.BestBlock;
 import dev.sculike.skymole.features.ChatClicks;
+import dev.sculike.skymole.features.CompactPop;
 import dev.sculike.skymole.features.CorpseLoot;
 import dev.sculike.skymole.features.PickobulusPreview;
 import dev.sculike.skymole.features.PuzzlerSolver;
@@ -65,6 +66,7 @@ public class SkyMole implements ClientModInitializer {
 		SpreadStats.register();
 		Chat.register();
 		ChatClicks.register();
+		CompactPop.register();
 		CommissionMenu.register();
 		Commissions.register();
 		ForgeReminder.register();
@@ -94,6 +96,9 @@ public class SkyMole implements ClientModInitializer {
 		// Cutscenes (corpse roulette, big drops) draw on top of everything.
 		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(Branding.MOD_ID, "cutscenes"),
 				(g, delta) -> Safe.run("Cutscenes", () -> Cutscenes.render(g)));
+		// Small and above the HUD, but under the full-screen celebrations.
+		HudElementRegistry.addLast(Identifier.fromNamespaceAndPath(Branding.MOD_ID, "compact"),
+				(g, delta) -> Safe.run("Compact pop", () -> CompactPop.render(g)));
 
 		boolean showcase = DevShowcase.enabled();
 		boolean showcaseWorld = DevShowcaseWorld.enabled();

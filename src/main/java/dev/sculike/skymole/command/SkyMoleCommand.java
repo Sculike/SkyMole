@@ -138,6 +138,10 @@ public final class SkyMoleCommand {
 						.then(literal("bigdrop").executes(ctx -> {
 							testBigDrop();
 							return 1;
+						}))
+						.then(literal("compact").executes(ctx -> {
+							dev.sculike.skymole.features.CompactPop.add("Enchanted Diamond");
+							return 1;
 						})))
 				.then(literal("alias")
 						.executes(SkyMoleCommand::listAliases)
@@ -257,6 +261,7 @@ public final class SkyMoleCommand {
 		out.add("Prices: " + dev.sculike.skymole.hypixel.Prices.describe()
 				+ "  Paused after errors: " + dev.sculike.skymole.Safe.paused());
 		out.add("Routes: " + dev.sculike.skymole.features.UserRoutes.describe());
+		out.add("Compact pop: " + dev.sculike.skymole.features.CompactPop.describe());
 		out.add("Best block: on=" + tools.bestBlock + " showOrange=" + tools.bestBlockSecond + " "
 				+ dev.sculike.skymole.features.BestBlock.describe());
 		out.add("");

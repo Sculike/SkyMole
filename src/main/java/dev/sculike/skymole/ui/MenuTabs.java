@@ -196,6 +196,13 @@ final class MenuTabs {
 					Minecraft.getInstance().gui.setScreen(null);
 					SkyMoleCommand.testRoulette();
 				}),
+				new Header("Compact"),
+				new Description("A small silent pop by your crosshair when Compact procs while mining."),
+				new Toggle("Compact pop", () -> fun.compactPop, v -> fun.compactPop = v, d.fun.compactPop),
+				new Button("Try it", () -> {
+					Minecraft.getInstance().gui.setScreen(null);
+					dev.sculike.skymole.features.CompactPop.add("Enchanted Diamond");
+				}),
 				new Header("Big drop"),
 				new Description("A celebration when a corpse drop is worth a lot."),
 				new Toggle("Big drop animation", () -> fun.bigDrop, v -> fun.bigDrop = v, d.fun.bigDrop),

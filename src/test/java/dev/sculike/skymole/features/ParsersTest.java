@@ -74,4 +74,18 @@ class ParsersTest {
 		// 216 spread cannot break more than the 2 neighbours present.
 		assertEquals(3.0, BestBlock.expectedBlocks(2, 216), 1e-9);
 	}
+
+	@Test
+	void compactLineNamesTheItem() {
+		java.util.regex.Pattern compact = java.util.regex.Pattern.compile("^COMPACT! You found an? (.+?)!");
+		java.util.regex.Matcher m = compact.matcher("COMPACT! You found an Enchanted Diamond!");
+		assertEquals(true, m.find());
+		assertEquals("Enchanted Diamond", m.group(1));
+
+		m = compact.matcher("COMPACT! You found a Enchanted Iron Ingot!");
+		assertEquals(true, m.find());
+		assertEquals("Enchanted Iron Ingot", m.group(1));
+
+		assertEquals(false, compact.matcher("You found a diamond").find());
+	}
 }
