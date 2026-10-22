@@ -44,6 +44,13 @@ public final class BestBlock {
 	private static final int FOLLOW_DISTANCE = 2;
 	/** cos(35 degrees): new picks must be within 35 degrees of your crosshair. */
 	private static final double MIN_VIEW_DOT = 0.82;
+	/**
+	 * cos(60 degrees): wider than the pick cone, and only used for drawing. A block picked
+	 * while you faced it stops being drawn once you turn away, rather than sitting off-screen
+	 * behind you. The gap between the two cones is deliberate: it stops the outline flickering
+	 * off and on while you line a shot up.
+	 */
+	private static final double DRAW_VIEW_DOT = 0.5;
 	private static final int RESCAN_TICKS = 4;
 	private static final int ORANGE = 0xFFFF9F40;
 
@@ -51,6 +58,8 @@ public final class BestBlock {
 	private static BlockPos green;
 	private static BlockPos orange;
 	private static double greenExpected;
+	/** Chance orange is free to mine right after green, 0 to 1. */
+	private static double orangeChance;
 	private static int ticks;
 	private static boolean spreadWarned;
 	private static MiningIsland warnedIsland;
@@ -63,6 +72,20 @@ public final class BestBlock {
 	 */
 	static double expectedBlocks(int neighbors, double spread) {
 		return 1 + Math.min(neighbors, Math.max(0, spread) / 100.0);
+	}
+
+	/**
+	 * How likely orange is free to mine the moment green breaks.
+	 *
+	 * <p>Mining Spread does not break every neighbour: with N same-ore neighbours it breaks about
+	 * min(N, spread/100) of them. Orange sits behind one of those, so its chance of being clear is
+	 * roughly the share of neighbours that go. A block already in the open is simply 1.
+	 */
+	static double freeChance(int greenNeighbours, double spread, boolean alreadyExposed) {
+		if (alreadyExposed) return 1;
+		if (greenNeighbours <= 0) return 0;
+		double breaks = Math.min(greenNeighbours, Math.max(0, spread) / 100.0);
+		return Math.min(1, breaks / greenNeighbours);
 	}
 
 	/**
@@ -96,6 +119,7 @@ public final class BestBlock {
 		ore = null;
 		green = null;
 		orange = null;
+		orangeChance = 0;
 	}
 
 	/** Called every client tick. */
@@ -139,7 +163,7 @@ public final class BestBlock {
 			boolean mined = !ore.equals(oreAt(level, green));
 			green = null;
 			if (mined && orange != null && oreInReach(level, eye, orange)) green = orange;
-			else if (mined) green = best(level, player, eye, was, spread, CONTINUE_AREA, false);
+			else if (mined) green = best(level, player, eye, was, spread, CONTINUE_AREA, true);
 			orange = null;
 		}
 
@@ -153,7 +177,10 @@ public final class BestBlock {
 		if (orange == null || orange.equals(green) || !oreInReach(level, eye, orange) || chebyshev(orange, green) > 2) {
 			orange = bestAfter(level, player, eye, green, spread);
 		}
-		greenExpected = expectedBlocks(neighbors(level, green, Set.of()), spread);
+		int greenNeighbours = neighbors(level, green, Set.of());
+		greenExpected = expectedBlocks(greenNeighbours, spread);
+		orangeChance = orange == null ? 0
+				: freeChance(greenNeighbours, spread, visible(level, player, eye, orange));
 	}
 
 	private static boolean oreInReach(ClientLevel level, Vec3 eye, BlockPos pos) {
@@ -237,6 +264,8 @@ public final class BestBlock {
 			if (gone.contains(pos)) continue;
 			Vec3 mid = Vec3.atCenterOf(pos);
 			if (mid.distanceTo(eye) > REACH) continue;
+			// Orange used to ignore where you were looking, so it could land behind you.
+			if (look.dot(mid.subtract(eye).normalize()) < MIN_VIEW_DOT) continue;
 			if (!ore.equals(oreAt(level, pos))) continue;
 			boolean uncovered = false;
 			for (Direction d : Direction.values()) {
@@ -282,21 +311,36 @@ public final class BestBlock {
 		return GizmoStyle.stroke(color, 6f);
 	}
 
+	/** True when the block is inside the drawing cone, so nothing is outlined off-screen. */
+	private static boolean inSight(Minecraft mc, BlockPos pos) {
+		if (mc.player == null) return false;
+		Vec3 eye = mc.player.getEyePosition();
+		return mc.player.getLookAngle().dot(Vec3.atCenterOf(pos).subtract(eye).normalize()) >= DRAW_VIEW_DOT;
+	}
+
 	private static void draw(Minecraft mc, boolean showOrange) {
-		if (green == null) return;
+		if (green == null || !inSight(mc, green)) return;
 		try (var ignored = mc.collectPerTickGizmos()) {
 			// Slightly bigger than the block so the lines aren't hidden inside its edges.
 			// No setAlwaysOnTop: hidden behind other blocks, like a normal block outline.
 			Gizmos.cuboid(green, 0.01f, outline(Branding.GOOD));
-			if (showOrange && orange != null) Gizmos.cuboid(orange, 0.01f, outline(ORANGE));
 			String label = "x" + String.format(Locale.ROOT, "%.1f", greenExpected);
 			Gizmos.billboardText(label, Vec3.atCenterOf(green).add(0, 0.8, 0),
 					TextGizmo.Style.forColorAndCentered(Branding.GOOD).withScale(0.4f));
+
+			if (showOrange && orange != null && inSight(mc, orange)) {
+				Gizmos.cuboid(orange, 0.01f, outline(ORANGE));
+				// How likely spread clears the way to it, so a low number tells you to pick again.
+				String chance = Math.round(orangeChance * 100) + "%";
+				Gizmos.billboardText(chance, Vec3.atCenterOf(orange).add(0, 0.8, 0),
+						TextGizmo.Style.forColorAndCentered(ORANGE).withScale(0.35f));
+			}
 		}
 	}
 
 	/** For /skymole debug. */
 	public static String describe() {
-		return "ore=" + ore + " green=" + green + " orange=" + orange + " expected=" + greenExpected;
+		return "ore=" + ore + " green=" + green + " orange=" + orange + " expected=" + greenExpected
+				+ " orangeChance=" + Math.round(orangeChance * 100) + "%";
 	}
 }

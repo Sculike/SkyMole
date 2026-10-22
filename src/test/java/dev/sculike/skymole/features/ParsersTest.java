@@ -52,4 +52,26 @@ class ParsersTest {
 		assertEquals("96.2k", PowderTracker.compact(96_210));
 		assertEquals("1.25M", PowderTracker.compact(1_250_000));
 	}
+
+	@Test
+	void orangeIsFreeOnlyAsOftenAsSpreadClearsTheWay() {
+		// Already in the open: nothing has to break first.
+		assertEquals(1.0, BestBlock.freeChance(3, 0, true), 1e-9);
+		// 200 spread breaks about 2 of green's 4 neighbours, so a given one is even odds.
+		assertEquals(0.5, BestBlock.freeChance(4, 200, false), 1e-9);
+		// Enough spread to clear every neighbour: the way is always open.
+		assertEquals(1.0, BestBlock.freeChance(2, 400, false), 1e-9);
+		// No spread at all means nothing extra breaks.
+		assertEquals(0.0, BestBlock.freeChance(4, 0, false), 1e-9);
+		// Green with no neighbours cannot uncover anything.
+		assertEquals(0.0, BestBlock.freeChance(0, 500, false), 1e-9);
+	}
+
+	@Test
+	void expectedBlocksCapsAtTheNeighboursThatExist() {
+		assertEquals(1.0, BestBlock.expectedBlocks(0, 300), 1e-9);
+		assertEquals(3.0, BestBlock.expectedBlocks(2, 300), 1e-9);
+		// 216 spread cannot break more than the 2 neighbours present.
+		assertEquals(3.0, BestBlock.expectedBlocks(2, 216), 1e-9);
+	}
 }
