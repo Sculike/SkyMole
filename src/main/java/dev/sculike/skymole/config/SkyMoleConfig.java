@@ -216,6 +216,17 @@ public final class SkyMoleConfig {
 		public java.util.Map<String, int[]> custom = new java.util.HashMap<>();
 	}
 
+	/** Routes you recorded yourself by walking them. */
+	public static final class Routes {
+		public boolean show = true;
+		/** Route name -> the points along it, each {x, y, z}. */
+		public java.util.Map<String, java.util.List<int[]>> points = new java.util.LinkedHashMap<>();
+		/** Route name -> the island it was walked on, so it is only drawn there. */
+		public java.util.Map<String, String> island = new java.util.LinkedHashMap<>();
+		/** The route being drawn, or "" for none. */
+		public String showing = "";
+	}
+
 	public static final class General {
 		public int backgroundOpacityPercent = 80;
 		public boolean textShadow = true;
@@ -235,6 +246,7 @@ public final class SkyMoleConfig {
 	public Area area = new Area();
 	public Solvers solvers = new Solvers();
 	public Markers markers = new Markers();
+	public Routes routes = new Routes();
 	public Forge forge = new Forge();
 	public Fun fun = new Fun();
 	public Tracker tracker = new Tracker();

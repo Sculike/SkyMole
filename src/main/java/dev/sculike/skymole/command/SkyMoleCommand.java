@@ -24,6 +24,7 @@ import dev.sculike.skymole.config.SkyMoleConfig;
 import dev.sculike.skymole.features.CorpseLoot;
 import dev.sculike.skymole.features.Markers;
 import dev.sculike.skymole.features.PowderTracker;
+import dev.sculike.skymole.features.UserRoutes;
 import dev.sculike.skymole.hud.HudEditorScreen;
 import dev.sculike.skymole.hud.HudManager;
 import dev.sculike.skymole.hypixel.Chat;
@@ -86,6 +87,48 @@ public final class SkyMoleCommand {
 									String name = StringArgumentType.getString(ctx, "name");
 									return say(ctx, Markers.markByName(name)
 											? "Marked " + name + "." : "No spot called " + name + " on this island.");
+								})))
+				.then(literal("route")
+						.executes(SkyMoleCommand::listRoutes)
+						.then(literal("record").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
+							String name = StringArgumentType.getString(ctx, "name").trim();
+							if (!UserRoutes.start(name)) {
+								return say(ctx, "Already recording " + UserRoutes.recordingName()
+										+ ". Finish it with /skymole route save.");
+							}
+							return say(ctx, "Recording \"" + name + "\". Walk the route; points drop as you go. "
+									+ "/skymole route save when you're done.");
+						})))
+						.then(literal("point").executes(ctx -> {
+							int n = UserRoutes.addPoint();
+							return say(ctx, n < 0 ? "You're not recording a route."
+									: "Point " + n + " added where you're standing.");
+						}))
+						.then(literal("save").executes(ctx -> {
+							int n = UserRoutes.stop();
+							if (n < 0) return say(ctx, "You're not recording a route.");
+							if (n == 0) return say(ctx, "That route had nothing in it, so nothing was saved.");
+							return say(ctx, "Saved with " + n + " points. It's showing now.");
+						}))
+						.then(literal("cancel").executes(ctx -> {
+							UserRoutes.cancel();
+							return say(ctx, "Recording thrown away.");
+						}))
+						.then(literal("hide").executes(ctx -> {
+							UserRoutes.hide();
+							return say(ctx, "Route hidden.");
+						}))
+						.then(literal("delete").then(argument("name", StringArgumentType.greedyString())
+								.suggests(SkyMoleCommand::suggestRoutes).executes(ctx -> {
+									String name = StringArgumentType.getString(ctx, "name");
+									return say(ctx, UserRoutes.delete(name)
+											? "Deleted " + name + "." : "There's no route called " + name + ".");
+								})))
+						.then(argument("name", StringArgumentType.greedyString())
+								.suggests(SkyMoleCommand::suggestRoutes).executes(ctx -> {
+									String name = StringArgumentType.getString(ctx, "name");
+									return say(ctx, UserRoutes.show(name)
+											? "Showing " + name + "." : "There's no route called " + name + ".");
 								})))
 				.then(literal("test")
 						.then(literal("roulette").executes(ctx -> {
@@ -152,6 +195,25 @@ public final class SkyMoleCommand {
 		return builder.buildFuture();
 	}
 
+	private static int listRoutes(CommandContext<FabricClientCommandSource> ctx) {
+		if (UserRoutes.names().isEmpty()) {
+			say(ctx, "No routes yet. Walk one with /skymole route record <name>.");
+			return 1;
+		}
+		say(ctx, "Your routes (click one to show it):");
+		for (String name : UserRoutes.names()) {
+			String island = UserRoutes.islandOf(name);
+			helpLine(ctx, "/skymole route " + name, island.isEmpty() ? "" : "on " + island);
+		}
+		return 1;
+	}
+
+	private static CompletableFuture<Suggestions> suggestRoutes(CommandContext<FabricClientCommandSource> ctx,
+			SuggestionsBuilder builder) {
+		for (String name : UserRoutes.suggestions(builder.getRemaining())) builder.suggest(name);
+		return builder.buildFuture();
+	}
+
 	private static int help(CommandContext<FabricClientCommandSource> ctx) {
 		say(ctx, "Commands (click one to use it):");
 		helpLine(ctx, "/skymole", "open the settings menu");
@@ -161,6 +223,8 @@ public final class SkyMoleCommand {
 		helpLine(ctx, "/skymole marker ", "<spot>  mark a spot, e.g. Fetchur or Royal Mines");
 		helpLine(ctx, "/skymole marker set ", "<spot>  move a spot to where you stand");
 		helpLine(ctx, "/skymole marker clear", "remove the marker");
+		helpLine(ctx, "/skymole route record ", "<name>  walk a route and save it");
+		helpLine(ctx, "/skymole route", "list your routes, or show one");
 		helpLine(ctx, "/skymole alias", "short commands, e.g. /don for /tptodonexpresso");
 		helpLine(ctx, "/skymole debug", "save what SkyMole reads, for bug reports");
 		return 1;
@@ -192,6 +256,7 @@ public final class SkyMoleCommand {
 		out.add("Forge: " + dev.sculike.skymole.features.ForgeReminder.describe());
 		out.add("Prices: " + dev.sculike.skymole.hypixel.Prices.describe()
 				+ "  Paused after errors: " + dev.sculike.skymole.Safe.paused());
+		out.add("Routes: " + dev.sculike.skymole.features.UserRoutes.describe());
 		out.add("Best block: on=" + tools.bestBlock + " showOrange=" + tools.bestBlockSecond + " "
 				+ dev.sculike.skymole.features.BestBlock.describe());
 		out.add("");

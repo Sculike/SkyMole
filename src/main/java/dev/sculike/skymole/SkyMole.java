@@ -13,6 +13,7 @@ import dev.sculike.skymole.features.CorpseLoot;
 import dev.sculike.skymole.features.PickobulusPreview;
 import dev.sculike.skymole.features.PuzzlerSolver;
 import dev.sculike.skymole.features.TitaniumAlert;
+import dev.sculike.skymole.features.UserRoutes;
 import dev.sculike.skymole.features.Welcome;
 import dev.sculike.skymole.ui.Keybinds;
 import dev.sculike.skymole.hypixel.Prices;
@@ -110,6 +111,7 @@ public class SkyMole implements ClientModInitializer {
 			Safe.run("Waypoints", () -> Markers.tick(client));
 			Safe.run("Best next block", () -> BestBlock.tick(client));
 			Safe.run("Mob outlines", () -> MobOutlines.tick(client));
+			Safe.run("Routes", () -> UserRoutes.tick(client));
 			Safe.run("Titanium alert", () -> TitaniumAlert.tick(client));
 			Safe.run("Pickobulus preview", () -> PickobulusPreview.tick(client));
 			Safe.run("Puzzler solver", () -> PuzzlerSolver.tick(client));
